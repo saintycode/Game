@@ -1,13 +1,13 @@
 // Game state
 let resources = {
-    wood: 0,
-    stone: 0,
-    food: 0
+    wood: 10,
+    stone: 10,
+    food: 10
 };
 
 let buildings = {
     townCentre: 1,
-    house: 0,
+    house: 1,
     farm: 0,
     mill: 0,
     market: 0,
@@ -17,9 +17,9 @@ let buildings = {
 // Building costs
 const buildingCosts = {
     townCentre: { wood: 0, stone: 0, food: 0 },
-    house: { wood: 10, stone: 5, food: 0 },
+    house: { wood: 10, stone: 5, food: 10 },
     farm: { wood: 15, stone: 7, food: 0 },
-    mill: { wood: 20, stone: 10, food: 0 },
+    mill: { wood: 20, stone: 10, food: 20 },
     market: { wood: 25, stone: 15, food: 0 },
     tower: { wood: 30, stone: 20, food: 0 }
 };
