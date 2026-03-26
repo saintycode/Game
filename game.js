@@ -1,11 +1,12 @@
 // Game state
 let resources = {
-    wood: 100,
-    stone: 50,
-    food: 30
+    wood: 0,
+    stone: 0,
+    food: 0
 };
 
 let buildings = {
+    townCentre: 1,
     house: 0,
     farm: 0,
     mill: 0,
@@ -15,14 +16,20 @@ let buildings = {
 
 // Building costs
 const buildingCosts = {
-    house: { wood: 10, stone: 5 },
-    farm: { wood: 15, stone: 7 },
-    mill: { wood: 20, stone: 10 },
-    market: { wood: 25, stone: 15 },
-    tower: { wood: 30, stone: 20 }
+    townCentre: { wood: 0, stone: 0, food: 0 },
+    house: { wood: 10, stone: 5, food: 0 },
+    farm: { wood: 15, stone: 7, food: 0 },
+    mill: { wood: 20, stone: 10, food: 0 },
+    market: { wood: 25, stone: 15, food: 0 },
+    tower: { wood: 30, stone: 20, food: 0 }
 };
 
-// Gathering rates
+// Resource generation rates per minute
+const generationRates = {
+    townCentre: { wood: 1, stone: 1, food: 1 }
+};
+
+// Gathering rates (for future manual gathering)
 const gatherRates = {
     wood: 5,
     stone: 3,
@@ -31,12 +38,25 @@ const gatherRates = {
 
 // Update display
 function updateDisplay() {
-    document.getElementById('wood').textContent = 'Wood: ' + resources.wood;
-    document.getElementById('stone').textContent = 'Stone: ' + resources.stone;
-    document.getElementById('food').textContent = 'Food: ' + resources.food;
+    document.getElementById('wood').textContent = 'Wood: ' + Math.floor(resources.wood);
+    document.getElementById('stone').textContent = 'Stone: ' + Math.floor(resources.stone);
+    document.getElementById('food').textContent = 'Food: ' + Math.floor(resources.food);
 }
 
-// Gather resources
+// Generate resources from buildings
+function generateResources() {
+    if (buildings.townCentre > 0) {
+        resources.wood += generationRates.townCentre.wood * buildings.townCentre;
+        resources.stone += generationRates.townCentre.stone * buildings.townCentre;
+        resources.food += generationRates.townCentre.food * buildings.townCentre;
+        updateDisplay();
+    }
+}
+
+// Resource generation every 60 seconds (1 minute)
+setInterval(generateResources, 60000);
+
+// Gather resources (manual gathering for testing)
 document.getElementById('gather-wood')?.addEventListener('click', () => {
     resources.wood += gatherRates.wood;
     updateDisplay();
