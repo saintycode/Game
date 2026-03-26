@@ -7,11 +7,11 @@ let resources = {
 
 let buildings = {
     townCentre: 1,
-    house: 1,
-    farm: 0,
-    mill: 0,
-    market: 0,
-    tower: 0
+    house: 10,
+    farm: 4,
+    mill: 1,
+    market: 1,
+    tower: 4
 };
 
 // Building costs
