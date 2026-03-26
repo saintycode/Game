@@ -4,12 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Village Building Game</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        #canvas { border: 1px solid #000; display: block; margin: 20px auto; }
-        #resources { text-align: center; margin: 20px; }
-        .building-card { border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Welcome to the Simple Village Building Game</h1>
@@ -25,16 +20,10 @@
         <div class="building-card">
             <h3>House</h3>
             <p>Cost: 10 Wood, 5 Stone</p>
-            <button>Build</button>
-        </div>
-        <div class="building-card">
-            <h3>Farm</h3>
-            <p>Cost: 15 Wood, 7 Stone</p>
-            <button>Build</button>
+            <p id="house-count">Built: 0</p>
+            <button id="build-house">Build</button>
         </div>
     </div>
-    <script>
-        // JavaScript for game logic will go here
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
