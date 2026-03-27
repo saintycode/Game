@@ -421,6 +421,18 @@ document.getElementById('build-tower')?.addEventListener('click', () => {
 });
 
 // Initialize
+function updateDisplay() {
+    document.getElementById('wood').textContent = 'Wood: ' + Math.floor(resources.wood);
+    document.getElementById('stone').textContent = 'Stone: ' + Math.floor(resources.stone);
+    document.getElementById('food').textContent = 'Food: ' + Math.floor(resources.food);
+
+    const idleEl = document.getElementById('villagers-idle');
+    const gatheringEl = document.getElementById('villagers-gathering');
+
+    if (idleEl) idleEl.textContent = 'Idle: ' + villagers.idle;
+    if (gatheringEl) gatheringEl.textContent = 'Gathering: ' + villagers.gathering;
+}
+
 function initGame() {
   updateDisplay();
   drawAllBuildings();
