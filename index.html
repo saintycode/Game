@@ -12,13 +12,16 @@
         <h2>Resources</h2>
         <p id="wood">Wood: 0</p>
         <p id="stone">Stone: 0</p>
+        <p id="stone">Coin: 0</p>
         <p id="food">Food: 0</p>
         <p id="villagers-idle">Idle: 2</p>
         <p id="villagers-gathering">Gathering: 0</p>
+        <p id="villagers-working">Gathering: 0</p>
 </div>
     </div>
     <div class="action-buttons">
   <button id="send-villagers">Send Villager to Gather</button>
+  <button id="send-villagers">Send Villager to Work</button>
   <button id="recall-villagers">Recall Villager</button>
     </div>
     <canvas id="canvas" width="800" height="600"></canvas>
@@ -53,7 +56,7 @@
 
 <div class="building-card">
   <h3>Guard Tower</h3>
-  <p>Cost: 30 Wood, 20 Stone</p>
+  <p>Cost: 30 Wood, 20 Stone, 10 coin</p>
   <p id="tower-count">Built: 0</p>
   <button id="build-tower">Build</button>
 </div>
