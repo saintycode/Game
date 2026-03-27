@@ -422,4 +422,7 @@ document.getElementById('build-tower')?.addEventListener('click', () => {
 
 // Initialize
 updateDisplay();
-drawAllBuildings();
+
+requestAnimationFrame(() => {
+  drawAllBuildings();
+});
