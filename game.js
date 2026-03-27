@@ -421,8 +421,10 @@ document.getElementById('build-tower')?.addEventListener('click', () => {
 });
 
 // Initialize
-updateDisplay();
-
-requestAnimationFrame(() => {
+function initGame() {
+  updateDisplay();
   drawAllBuildings();
-});
+}
+
+requestAnimationFrame(initGame);
+
