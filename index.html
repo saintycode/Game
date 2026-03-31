@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the Simpleton</h1>
+    <h1>Welcome to Simpleton</h1>
 <div id="resources">
   <h2>Resources</h2>
 
@@ -26,35 +26,32 @@
     <span id="villagers-working">Working: 0</span>
     <span id="villagers-training">Training: 0</span>
   </div>
-</div>s-training">Training: 0</p> 
 </div>
     <div class="action-buttons">
   <button id="send-villagers">Send Villager to Gather</button>
-  <button id="send-villagers-work">Send Villager to Work</button>
   <button id="send-villagers-training">Send Villager to Train</button>
   <button id="recall-villagers">Recall Villager</button>
-  <button id="recall-villagers-work">Recall Villager From work</button>
-        
     </div>
-    <canvas id="canvas" width="1200" height="800"></canvas>
-    <div id="building-cards">
+    <canvas id="canvas" width="800" height="800"></canvas>
+ 
         
 <div id="building-cards">
   <h2>Building Cards</h2>
-
-  <!-- House (no workers) -->
-  <div class="building-card">
-    <h3>House</h3>
-    <p>Cost: 10 Wood, 5 Stone</p>
-
-    <div class="build-row">
-      <button id="build-house">Build</button>
-      <span id="house-count">Built: 0</span>
-    </div>
+<div class="building-card no-workers">
+  <img src="images/house.png" alt="House" class="building-image">
+  <h3>House</h3>
+  <p class="cost">Cost: 10 Wood, 5 Stone</p>
+  <div class="build-row">
+    <button id="build-house">Build</button>
+    <span id="house-count">Built: 0</span>
   </div>
+  <div class="workers-row"></div>
+  <div class="worker-controls"></div>
+</div>
 
   <!-- Farm (workers) -->
   <div class="building-card">
+<img src="images/Farm.png" alt="Farm" class="building-image">
     <h3>Farm</h3>
     <p>Cost: 15 Wood, 7 Stone</p>
 
@@ -75,6 +72,7 @@
 
   <!-- Logging (workers) -->
   <div class="building-card">
+    <img src="images/Logging.png" alt="Logging" class="building-image">
     <h3>Logging</h3>
     <p>Cost: 20 Wood, 10 Stone</p>
 
@@ -95,6 +93,7 @@
 
   <!-- Market (workers) -->
   <div class="building-card">
+<img src="images/Market Tower.png" alt="Market" class="building-image">
     <h3>Market</h3>
     <p>Cost: 25 Wood, 15 Stone</p>
 
@@ -114,13 +113,18 @@
   </div>
 
   <!-- Guard Tower (no workers) -->
-  <div class="building-card">
+<div class="building-card no-workers">
+  <img src="images/Guard Tower.png" alt="Guard Tower" class="building-image">
     <h3>Guard Tower</h3>
     <p>Cost: 30 Wood, 20 Stone, 10 Coin</p>
 
     <div class="build-row">
       <button id="build-tower">Build</button>
       <span id="tower-count">Built: 0</span>
+</div>
+  <div class="workers-row"></div>
+  <div class="worker-controls"></div>
+</div>
     </div>
   </div>
 </div>
