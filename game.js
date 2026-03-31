@@ -1,5 +1,4 @@
-// ======================
-// Game State
+// ======================// =================
 // ======================
 let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
@@ -14,6 +13,7 @@ let buildings = {
 
 let villagers = { idle: 2, gathering: 0 };
 
+// ONLY town centre present at load ✅
 let placedBuildings = [{ type: 'townCentre', x: 355, y: 285 }];
 
 let placementMode = {
@@ -29,8 +29,6 @@ let ghost = { x: 0, y: 0, visible: false, valid: false };
 // ======================
 const GRID_SIZE = 20;
 const EDGE_BUFFER = 40;
-
-// simple footprint used for bounds + collision
 const BUILDING_RADIUS = 35;
 
 const buildingCosts = {
@@ -57,8 +55,20 @@ const ctx = canvas.getContext('2d');
 // ======================
 // Helpers
 // ======================
-function snapToGrid(value) {
-  return Math.round(value / GRID_SIZE) * GRID_SIZE;
+function snapToGrid(v) {
+  return Math.round(v / GRID_SIZE) * GRID_SIZE;
+}
+
+function getRadiusForType(type) {
+  switch (type) {
+    case 'townCentre': return 60;
+    case 'market': return 45;
+    case 'farm': return 40;
+    case 'mill': return 40;
+    case 'tower': return 35;
+    case 'house': return 30;
+    default: return BUILDING_RADIUS;
+  }
 }
 
 function isWithinBounds(x, y, r = BUILDING_RADIUS) {
@@ -70,24 +80,11 @@ function isWithinBounds(x, y, r = BUILDING_RADIUS) {
   );
 }
 
-function getRadiusForType(type) {
-  // if you want different sizes per building, change here
-  switch (type) {
-    case 'townCentre': return 60;
-    case 'market': return 45;
-    case 'tower': return 35;
-    default: return BUILDING_RADIUS;
-  }
-}
-
 function collides(x, y, type) {
   const r1 = getRadiusForType(type);
-
   return placedBuildings.some(b => {
     const r2 = getRadiusForType(b.type);
-    const dx = b.x - x;
-    const dy = b.y - y;
-    return Math.hypot(dx, dy) < (r1 + r2);
+    return Math.hypot(b.x - x, b.y - y) < (r1 + r2);
   });
 }
 
@@ -97,8 +94,10 @@ function canPlace(x, y, type) {
 }
 
 // ======================
-// Drawing (assumes you already have drawFarm/drawMill/drawMarket/drawTower etc.)
+// Drawing
 // ======================
+
+// Town Centre (your existing)
 function drawTownCentre(x, y) {
   ctx.fillStyle = '#8B8680';
   ctx.fillRect(x - 60, y - 20, 120, 40);
@@ -112,13 +111,48 @@ function drawTownCentre(x, y) {
   ctx.fill();
 }
 
-// keep your existing detailed drawHouse if you want;
-// this supports ghost styling.
+// House (your existing, supports ghost)
 function drawHouse(x, y, ghostMode = false, valid = true) {
-  ctx.globalAlpha = ghostMode ? 0.5 : 1;
+  ctx.globalAlpha = ghostMode ? 0.55 : 1;
   ctx.fillStyle = valid ? '#A0522D' : '#FF0000';
   ctx.fillRect(x - 25, y - 40, 50, 40);
   ctx.globalAlpha = 1;
+}
+
+// ✅ Minimal fallback draw functions so nothing crashes
+function drawFarm(x, y) {
+  ctx.fillStyle = '#228B22';
+  ctx.fillRect(x - 30, y - 20, 60, 40);
+  ctx.fillStyle = '#8B4513';
+  ctx.strokeRect(x - 32, y - 22, 64, 44);
+}
+
+function drawMill(x, y) {
+  ctx.fillStyle = '#CD853F';
+  ctx.fillRect(x - 25, y - 25, 50, 50);
+  ctx.strokeStyle = '#8B4513';
+  ctx.beginPath();
+  ctx.arc(x + 22, y, 12, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawMarket(x, y) {
+  ctx.fillStyle = '#DAA520';
+  ctx.fillRect(x - 35, y - 20, 70, 40);
+  ctx.fillStyle = '#FF6347';
+  ctx.beginPath();
+  ctx.moveTo(x - 35, y - 20);
+  ctx.lineTo(x, y - 45);
+  ctx.lineTo(x + 35, y - 20);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawTower(x, y) {
+  ctx.fillStyle = '#A9A9A9';
+  ctx.fillRect(x - 15, y - 45, 30, 60);
+  ctx.fillStyle = '#696969';
+  ctx.fillRect(x - 18, y - 50, 36, 8);
 }
 
 function drawByType(type, x, y) {
@@ -133,15 +167,14 @@ function drawByType(type, x, y) {
 }
 
 function drawGhost(type, x, y, valid) {
-  // Generic ghost: draw building with alpha + draw an outline indicator
   ctx.save();
   ctx.globalAlpha = 0.55;
 
-  // If it's a house, use the special ghost-aware drawHouse
+  // Use house's built-in ghost styling
   if (type === 'house') {
     drawHouse(x, y, true, valid);
   } else {
-    // for other buildings, just draw them faded
+    // other types: draw faded but never crash (we defined them above)
     drawByType(type, x, y);
   }
 
@@ -149,9 +182,8 @@ function drawGhost(type, x, y, valid) {
   ctx.globalAlpha = 1;
   ctx.strokeStyle = valid ? '#3CB371' : '#FF3333';
   ctx.lineWidth = 2;
-  const r = getRadiusForType(type);
   ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.arc(x, y, getRadiusForType(type), 0, Math.PI * 2);
   ctx.stroke();
 
   ctx.restore();
@@ -160,9 +192,7 @@ function drawGhost(type, x, y, valid) {
 function drawAllBuildings() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  placedBuildings.forEach(b => {
-    drawByType(b.type, b.x, b.y);
-  });
+  placedBuildings.forEach(b => drawByType(b.type, b.x, b.y));
 
   if (ghost.visible && placementMode.active) {
     drawGhost(placementMode.type, ghost.x, ghost.y, ghost.valid);
@@ -183,6 +213,7 @@ function updateDisplay() {
   if (foodEl) foodEl.textContent = `Food: ${Math.floor(resources.food)}`;
   if (coinEl) coinEl.textContent = `Coin: ${Math.floor(resources.coin)}`;
 
+  // ⚠️ Make sure your HTML IDs match these:
   const idleEl = document.getElementById('villagers-idle');
   const gatheringEl = document.getElementById('villagers-gathering');
   if (idleEl) idleEl.textContent = `Idle: ${villagers.idle}`;
@@ -209,18 +240,23 @@ setInterval(generateResources, 30000);
 // ======================
 // Placement Logic
 // ======================
+function setGhostFromMouseEvent(e) {
+  const r = canvas.getBoundingClientRect();
+  ghost.x = snapToGrid(e.clientX - r.left);
+  ghost.y = snapToGrid(e.clientY - r.top);
+  ghost.visible = true;
+  ghost.valid = canPlace(ghost.x, ghost.y, placementMode.type);
+}
+
 canvas.addEventListener('mousemove', e => {
   if (!placementMode.active) return;
+  setGhostFromMouseEvent(e);
+  drawAllBuildings();
+});
 
-  const r = canvas.getBoundingClientRect();
-  const x = snapToGrid(e.clientX - r.left);
-  const y = snapToGrid(e.clientY - r.top);
-
-  ghost.x = x;
-  ghost.y = y;
-  ghost.visible = true;
-  ghost.valid = canPlace(x, y, placementMode.type);
-
+canvas.addEventListener('mouseleave', () => {
+  if (!placementMode.active) return;
+  ghost.visible = false;
   drawAllBuildings();
 });
 
@@ -231,16 +267,14 @@ canvas.addEventListener('click', () => {
   placedBuildings.push({ type: placementMode.type, x: ghost.x, y: ghost.y });
   buildings[placementMode.type]++;
 
-  // House bonus
+  // ✅ House bonus: +2 idle villagers
   if (placementMode.type === 'house') {
     villagers.idle += 2;
   }
 
-  // Update count label if present
   const countEl = document.getElementById(`${placementMode.type}-count`);
   if (countEl) countEl.textContent = `Built: ${buildings[placementMode.type]}`;
 
-  // clear placement state
   placementMode.active = false;
   placementMode.type = null;
   placementMode.refundCost = null;
@@ -274,7 +308,7 @@ window.addEventListener('keydown', e => {
 // Build Buttons
 // ======================
 function startPlacement(type) {
-  // enforce market singleton
+  // market singleton
   if (type === 'market' && buildings.market > 0) {
     alert('Only one market allowed');
     return;
@@ -282,7 +316,6 @@ function startPlacement(type) {
 
   const cost = buildingCosts[type];
 
-  // check affordability
   for (const r in cost) {
     if (resources[r] < cost[r]) {
       alert('Not enough resources!');
@@ -290,14 +323,18 @@ function startPlacement(type) {
     }
   }
 
-  // deduct now, refund if cancelled
   for (const r in cost) resources[r] -= cost[r];
 
   placementMode.active = true;
   placementMode.type = type;
   placementMode.refundCost = cost;
 
+  // ✅ Make ghost appear immediately (even before mousemove)
+  ghost.visible = true;
+  ghost.valid = false;
+
   updateDisplay();
+  drawAllBuildings();
 }
 
 document.getElementById('build-house')?.addEventListener('click', () => startPlacement('house'));
