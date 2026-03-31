@@ -478,6 +478,7 @@ document.getElementById('recall-villagers-work')?.addEventListener('click', () =
 document.getElementById('send-villagers-Training')?.addEventListener('click', () => {
   alert('Training feature coming next 👍');
 });
+if (trainingEl) trainingEl.textContent = `Training: ${villagers.training}`;
 updateWorkerUI();
 updateWorkButtonState();
 // ======================
