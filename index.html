@@ -10,12 +10,12 @@
     <h1>Welcome to the Simpleton</h1>
     <div id="resources">
         <h2>Resources</h2>
-        <p id="wood">Wood: 0</p>
+       <span  <p id="wood">Wood: 0</p>
         <p id="stone">Stone: 0</p>
         <p id="coin">Coin: 0</p>
-        <p id="food">Food: 0</p>
+        <p id="food">Food: 0</p>     </span>
         <h2>Villagers</h2>
-        <p id="villagers-idle">Idle: 2</p>
+       <span  <p id="villagers-idle">Idle: 2</p>
         <p id="villagers-gathering">Gathering: 0</p>
         <p id="villagers-working">Working: 0</p>
         <p id="villagers-training">Training: 0</p> 
@@ -31,43 +31,90 @@
     <canvas id="canvas" width="800" height="600"></canvas>
     <div id="building-cards">
         
-    <h2>Building Cards</h2>
-    <div class="building-card">
+<div id="building-cards">
+  <h2>Building Cards</h2>
+
+  <!-- House (no workers) -->
+  <div class="building-card">
     <h3>House</h3>
     <p>Cost: 10 Wood, 5 Stone</p>
-    <p id="house-count">Built: 0</p>
-    <button id="build-house">Build</button>
-            
- </div>
+
+    <div class="build-row">
+      <button id="build-house">Build</button>
+      <span id="house-count">Built: 0</span>
+    </div>
+  </div>
+
+  <!-- Farm (workers) -->
   <div class="building-card">
-  <h3>Farm</h3>
-  <p>Cost: 15 Wood, 7 Stone</p>
-  <p id="farm-count">Built: 0</p>
-  <p id="farm-workers">Workers: 0 / 0</p>
-  <button id="build-farm">Build</button>
-</div>
-        
-<div class="building-card">
-  <h3>Logging</h3>
-  <p>Cost: 20 Wood, 10 Stone</p>
-  <p id="logging-count">Built: 0</p>
-  <p id="logging-workers">Workers: 0 / 0</p>
-  <button id="build-logging">Build</button>
-</div>
-        
-<div class="building-card">
-  <h3>Market</h3>
-  <p>Cost: 25 Wood, 15 Stone</p>
-  <p id="market-count">Built: 0</p>
-  <p id="market-workers">Workers: 0 / 0</p>
-  <button id="build-market">Build</button>
-</div>
-        
-<div class="building-card">
-  <h3>Guard Tower</h3>
-  <p>Cost: 30 Wood, 20 Stone, 10 coin</p>
-  <p id="tower-count">Built: 0</p>
-  <button id="build-tower">Build</button>
+    <h3>Farm</h3>
+    <p>Cost: 15 Wood, 7 Stone</p>
+
+    <div class="build-row">
+      <button id="build-farm">Build</button>
+      <span id="farm-count">Built: 0</span>
+    </div>
+
+    <div class="workers-row">
+      Workers: <span id="farm-workers">0 / 0</span>
+    </div>
+
+    <div class="worker-controls">
+      <button id="farm-add-worker">+</button>
+      <button id="farm-remove-worker">−</button>
+    </div>
+  </div>
+
+  <!-- Logging (workers) -->
+  <div class="building-card">
+    <h3>Logging</h3>
+    <p>Cost: 20 Wood, 10 Stone</p>
+
+    <div class="build-row">
+      <button id="build-logging">Build</button>
+      <span id="logging-count">Built: 0</span>
+    </div>
+
+    <div class="workers-row">
+      Workers: <span id="logging-workers">0 / 0</span>
+    </div>
+
+    <div class="worker-controls">
+      <button id="logging-add-worker">+</button>
+      <button id="logging-remove-worker">−</button>
+    </div>
+  </div>
+
+  <!-- Market (workers) -->
+  <div class="building-card">
+    <h3>Market</h3>
+    <p>Cost: 25 Wood, 15 Stone</p>
+
+    <div class="build-row">
+      <button id="build-market">Build</button>
+      <span id="market-count">Built: 0</span>
+    </div>
+
+    <div class="workers-row">
+      Workers: <span id="market-workers">0 / 0</span>
+    </div>
+
+    <div class="worker-controls">
+      <button id="market-add-worker">+</button>
+      <button id="market-remove-worker">−</button>
+    </div>
+  </div>
+
+  <!-- Guard Tower (no workers) -->
+  <div class="building-card">
+    <h3>Guard Tower</h3>
+    <p>Cost: 30 Wood, 20 Stone, 10 Coin</p>
+
+    <div class="build-row">
+      <button id="build-tower">Build</button>
+      <span id="tower-count">Built: 0</span>
+    </div>
+  </div>
 </div>
     <script src="game.js"></script>
 </body>
