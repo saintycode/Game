@@ -7,13 +7,14 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the Simple Village Building Game</h1>
+    <h1>Welcome to the Simpleton</h1>
     <div id="resources">
         <h2>Resources</h2>
         <p id="wood">Wood: 0</p>
         <p id="stone">Stone: 0</p>
         <p id="coin">Coin: 0</p>
         <p id="food">Food: 0</p>
+        <h2>Villagers</h2>
         <p id="villagers-idle">Idle: 2</p>
         <p id="villagers-gathering">Gathering: 0</p>
         <p id="villagers-working">Working: 0</p>
@@ -25,23 +26,27 @@
   <button id="send-villagers-training">Send Villager to Train</button>
   <button id="recall-villagers">Recall Villager</button>
   <button id="recall-villagers-work">Recall Villager From work</button>
+        
     </div>
     <canvas id="canvas" width="800" height="600"></canvas>
     <div id="building-cards">
-        <h2>Building Cards</h2>
-        <div class="building-card">
-            <h3>House</h3>
-            <p>Cost: 10 Wood, 5 Stone</p>
-            <p id="house-count">Built: 0</p>
-            <button id="build-house">Build</button>
-        </div>
-        <div class="building-card">
+        
+    <h2>Building Cards</h2>
+    <div class="building-card">
+    <h3>House</h3>
+    <p>Cost: 10 Wood, 5 Stone</p>
+    <p id="house-count">Built: 0</p>
+    <button id="build-house">Build</button>
+            
+ </div>
+  <div class="building-card">
   <h3>Farm</h3>
   <p>Cost: 15 Wood, 7 Stone</p>
   <p id="farm-count">Built: 0</p>
   <p id="farm-workers">Workers: 0 / 0</p>
   <button id="build-farm">Build</button>
 </div>
+        
 <div class="building-card">
   <h3>Logging</h3>
   <p>Cost: 20 Wood, 10 Stone</p>
@@ -49,6 +54,7 @@
   <p id="logging-workers">Workers: 0 / 0</p>
   <button id="build-logging">Build</button>
 </div>
+        
 <div class="building-card">
   <h3>Market</h3>
   <p>Cost: 25 Wood, 15 Stone</p>
@@ -56,6 +62,7 @@
   <p id="market-workers">Workers: 0 / 0</p>
   <button id="build-market">Build</button>
 </div>
+        
 <div class="building-card">
   <h3>Guard Tower</h3>
   <p>Cost: 30 Wood, 20 Stone, 10 coin</p>
