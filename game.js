@@ -1,5 +1,6 @@
 // ====================== State
 // ======================
+document.addEventListener('DOMContentLoaded', () => {
 let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
 let buildings = {
@@ -114,4 +115,5 @@ function drawAllBuildings() {
 window.addEventListener('load', () => {
   updateDisplay();
   drawAllBuildings();
-});
+});});
+
