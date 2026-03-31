@@ -34,11 +34,16 @@ h2 {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-#resources p {
-    font-size: 18px;
-    margin: 10px 0;
-    font-weight: bold;
-    color: #333;
+#resources 
+.resource-group,
+.villager-group {
+  display: inline-flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 18px;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #333;
 }
 
 #canvas {
