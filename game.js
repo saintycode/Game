@@ -1,13 +1,29 @@
+// ======================// =================
 // ======================
-// load// Game State
-let placedBuildings = [{ type: 'townCentre', x: 355, y: 285 }];
+let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
-let placementMode = {
-  active: false,
-  type: null,
-  refundCost: null
+let buildings = {
+  townCentre: 1,
+  house: 0,
+  farm: 0,
+  logging: 0,
+  market: 0,
+  tower: 0
 };
 
+let villagers = { idle: 2, gathering: 0, working: 0, training: 0 };
+
+let workersAssigned = { farm: 0, logging: 0, market: 0 };
+
+const workerProduction = {
+  farm: { food: 1 },
+  logging: { wood: 1 },
+  market: { coin: 1 }
+};
+
+let placedBuildings = [{ type: 'townCentre', x: 355, y: 285 }];
+
+let placementMode = { active: false, type: null, refundCost: null };
 let ghost = { x: 0, y: 0, visible: false, valid: false };
 
 // ======================
@@ -26,26 +42,15 @@ const buildingCosts = {
   tower: { wood: 30, stone: 20, food: 0, coin: 10 }
 };
 
-const generationRates = {
-  townCentre: { wood: 1, stone: 1, food: 1 }
-};
-
+const generationRates = { townCentre: { wood: 1, stone: 1, food: 1 } };
 const gatherRates = { wood: 2, stone: 2, food: 1 };
-
-const buildingWorkSlots = {
-  farm: 2,
-  logging: 2,
-  market: 2
-  // house, townCentre, tower intentionally omitted (0 slots)
-};
+const buildingWorkSlots = { farm: 2, logging: 2, market: 2 };
 
 // ======================
 // Canvas
 // ======================
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-
-// Track last mouse position
 let lastMouse = { x: canvas.width / 2, y: canvas.height / 2 };
 
 // ======================
@@ -89,37 +94,26 @@ function canPlace(x, y, type) {
   return isWithinBounds(x, y, r) && !collides(x, y, type);
 }
 
-// Work slot helpers
 function getMaxSlotsFor(type) {
   return (buildings[type] || 0) * (buildingWorkSlots[type] || 0);
 }
 
 function assignWorkerTo(type) {
-  if (villagers.idle <= 0) {
-    alert('No idle villagers available');
-    return;
-  }
-
+  if (villagers.idle <= 0) return alert('No idle villagers available');
   const maxSlots = getMaxSlotsFor(type);
-  if (workersAssigned[type] >= maxSlots) {
-    alert(`No free ${type} work slots`);
-    return;
-  }
+  if (workersAssigned[type] >= maxSlots) return alert(`No free ${type} work slots`);
 
   villagers.idle--;
   villagers.working++;
   workersAssigned[type]++;
-
   updateDisplay();
 }
 
 function removeWorkerFrom(type) {
   if (workersAssigned[type] <= 0) return;
-
   workersAssigned[type]--;
   villagers.working--;
   villagers.idle++;
-
   updateDisplay();
 }
 
@@ -149,7 +143,7 @@ function drawHouse(x, y, ghostMode = false, valid = true) {
 function drawFarm(x, y) {
   ctx.fillStyle = '#228B22';
   ctx.fillRect(x - 30, y - 20, 60, 40);
-  ctx.fillStyle = '#8B4513';
+  ctx.strokeStyle = '#8B4513';
   ctx.strokeRect(x - 32, y - 22, 64, 44);
 }
 
@@ -183,37 +177,32 @@ function drawTower(x, y) {
 
 function drawByType(type, x, y) {
   switch (type) {
-    case 'townCentre': drawTownCentre(x, y); break;
-    case 'house': drawHouse(x, y); break;
-    case 'farm': drawFarm(x, y); break;
-    case 'logging': drawLogging(x, y); break;
-    case 'market': drawMarket(x, y); break;
-    case 'tower': drawTower(x, y); break;
+    case 'townCentre': return drawTownCentre(x, y);
+    case 'house': return drawHouse(x, y);
+    case 'farm': return drawFarm(x, y);
+    case 'logging': return drawLogging(x, y);
+    case 'market': return drawMarket(x, y);
+    case 'tower': return drawTower(x, y);
   }
 }
 
 function drawGhost(type, x, y, valid) {
   ctx.save();
   ctx.globalAlpha = 0.55;
-
   if (type === 'house') drawHouse(x, y, true, valid);
   else drawByType(type, x, y);
-
   ctx.globalAlpha = 1;
   ctx.strokeStyle = valid ? '#3CB371' : '#FF3333';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(x, y, getRadiusForType(type), 0, Math.PI * 2);
   ctx.stroke();
-
   ctx.restore();
 }
 
 function drawAllBuildings() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   placedBuildings.forEach(b => drawByType(b.type, b.x, b.y));
-
   if (ghost.visible && placementMode.active) {
     drawGhost(placementMode.type, ghost.x, ghost.y, ghost.valid);
   }
@@ -226,12 +215,7 @@ function updateWorkerUI() {
   ['farm', 'logging', 'market'].forEach(type => {
     const el = document.getElementById(`${type}-workers`);
     if (!el) return;
-
-    const max = getMaxSlotsFor(type);
-    const current = workersAssigned[type];
-
-    // show just “current / max”
-    el.textContent = `${current} / ${max}`;
+    el.textContent = `${workersAssigned[type]} / ${getMaxSlotsFor(type)}`;
   });
 }
 
@@ -239,17 +223,14 @@ function updateWorkerButtons() {
   ['farm', 'logging', 'market'].forEach(type => {
     const addBtn = document.getElementById(`${type}-add-worker`);
     const removeBtn = document.getElementById(`${type}-remove-worker`);
-
     const max = getMaxSlotsFor(type);
-    const current = workersAssigned[type];
-
-    if (addBtn) addBtn.disabled = villagers.idle === 0 || current >= max;
-    if (removeBtn) removeBtn.disabled = current === 0;
+    const cur = workersAssigned[type];
+    if (addBtn) addBtn.disabled = villagers.idle === 0 || cur >= max;
+    if (removeBtn) removeBtn.disabled = cur === 0;
   });
 }
 
 function updateDisplay() {
-  // Match emoji-style labels used in index.html
   const foodEl = document.getElementById('food');
   const woodEl = document.getElementById('wood');
   const stoneEl = document.getElementById('stone');
@@ -278,21 +259,17 @@ function updateDisplay() {
 // Resource Generation
 // ======================
 function generateResources() {
-  // Town centre passive generation
   resources.wood += generationRates.townCentre.wood * buildings.townCentre;
   resources.stone += generationRates.townCentre.stone * buildings.townCentre;
   resources.food += generationRates.townCentre.food * buildings.townCentre;
 
-  // Gathering villagers
   resources.wood += gatherRates.wood * villagers.gathering;
   resources.stone += gatherRates.stone * villagers.gathering;
   resources.food += gatherRates.food * villagers.gathering;
 
-  // Working villagers (per building type)
   Object.entries(workersAssigned).forEach(([type, count]) => {
     const production = workerProduction[type];
     if (!production || count <= 0) return;
-
     Object.entries(production).forEach(([res, amount]) => {
       resources[res] += amount * count;
     });
@@ -300,7 +277,6 @@ function generateResources() {
 
   updateDisplay();
 }
-
 setInterval(generateResources, 30000);
 
 // ======================
@@ -318,9 +294,7 @@ canvas.addEventListener('mousemove', e => {
   const r = canvas.getBoundingClientRect();
   lastMouse.x = e.clientX - r.left;
   lastMouse.y = e.clientY - r.top;
-
   if (!placementMode.active) return;
-
   setGhostFromMouseEvent(e);
   drawAllBuildings();
 });
@@ -331,7 +305,6 @@ canvas.addEventListener('mouseleave', () => {
   drawAllBuildings();
 });
 
-// Place building on click
 canvas.addEventListener('click', () => {
   if (!placementMode.active) return;
   if (!ghost.valid) return;
@@ -339,10 +312,7 @@ canvas.addEventListener('click', () => {
   placedBuildings.push({ type: placementMode.type, x: ghost.x, y: ghost.y });
   buildings[placementMode.type]++;
 
-  // House bonus: +2 idle villagers
-  if (placementMode.type === 'house') {
-    villagers.idle += 2;
-  }
+  if (placementMode.type === 'house') villagers.idle += 2;
 
   const countEl = document.getElementById(`${placementMode.type}-count`);
   if (countEl) countEl.textContent = `Built: ${buildings[placementMode.type]}`;
@@ -356,7 +326,6 @@ canvas.addEventListener('click', () => {
   updateDisplay();
 });
 
-// Cancel placement + refund
 window.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (!placementMode.active) return;
@@ -380,14 +349,12 @@ window.addEventListener('keydown', e => {
 // Build Buttons
 // ======================
 function startPlacement(type) {
-  // market singleton rule
   if (type === 'market' && buildings.market > 0) {
     alert('Only one market allowed');
     return;
   }
 
   const cost = buildingCosts[type];
-
   for (const r in cost) {
     if (resources[r] < cost[r]) {
       alert('Not enough resources!');
@@ -395,14 +362,12 @@ function startPlacement(type) {
     }
   }
 
-  // deduct now; ESC refunds
   for (const r in cost) resources[r] -= cost[r];
 
   placementMode.active = true;
   placementMode.type = type;
   placementMode.refundCost = cost;
 
-  // ghost appears immediately under cursor
   ghost.x = snapToGrid(lastMouse.x);
   ghost.y = snapToGrid(lastMouse.y);
   ghost.visible = true;
@@ -418,7 +383,6 @@ document.getElementById('build-logging')?.addEventListener('click', () => startP
 document.getElementById('build-market')?.addEventListener('click', () => startPlacement('market'));
 document.getElementById('build-tower')?.addEventListener('click', () => startPlacement('tower'));
 
-// Worker buttons (Option B)
 document.getElementById('farm-add-worker')?.addEventListener('click', () => assignWorkerTo('farm'));
 document.getElementById('farm-remove-worker')?.addEventListener('click', () => removeWorkerFrom('farm'));
 document.getElementById('logging-add-worker')?.addEventListener('click', () => assignWorkerTo('logging'));
@@ -427,13 +391,10 @@ document.getElementById('market-add-worker')?.addEventListener('click', () => as
 document.getElementById('market-remove-worker')?.addEventListener('click', () => removeWorkerFrom('market'));
 
 // ======================
-// Villagers (Gathering + Training placeholder)
+// Villagers
 // ======================
 document.getElementById('send-villagers')?.addEventListener('click', () => {
-  if (villagers.idle <= 0) {
-    alert('No idle villagers available!');
-    return;
-  }
+  if (villagers.idle <= 0) return alert('No idle villagers available!');
   villagers.idle--;
   villagers.gathering++;
   updateDisplay();
@@ -446,7 +407,6 @@ document.getElementById('recall-villagers')?.addEventListener('click', () => {
   updateDisplay();
 });
 
-// Training placeholder (does nothing yet)
 document.getElementById('send-villagers-training')?.addEventListener('click', () => {
   alert('Training feature coming next 👍');
 });
@@ -458,37 +418,4 @@ function initGame() {
   updateDisplay();
   drawAllBuildings();
 }
-
 window.addEventListener('load', initGame);
-// ======================
-let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
-
-let buildings = {
-  townCentre: 1,
-  house: 0,
-  farm: 0,
-  logging: 0,
-  market: 0,
-  tower: 0
-};
-
-let villagers = {
-  idle: 2,
-  gathering: 0,
-  working: 0,
-  training: 0 // placeholder for next feature
-};
-
-let workersAssigned = {
-  farm: 0,
-  logging: 0,
-  market: 0
-};
-
-// 1 resource per worker per tick (30s)
-const workerProduction = {
-  farm: { food: 1 },
-  logging: { wood: 1 },
-  market: { coin: 1 }
-};
-
