@@ -1,5 +1,4 @@
-// ======================
-// Game Start
+// ====================== State
 // ======================
 let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
@@ -95,8 +94,22 @@ function canPlace(x, y, type) {
 // ======================
 // Init
 // ======================
-function updateDisplay() {}
-function drawAllBuildings() {}
+function updateDisplay() {
+  document.getElementById('food').textContent = `🌾:${resources.food}`;
+  document.getElementById('wood').textContent = `🪵:${resources.wood}`;
+  document.getElementById('stone').textContent = `⛏️:${resources.stone}`;
+  document.getElementById('coin').textContent = `🪙:${resources.coin}`;
+}
+
+function drawAllBuildings() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  placedBuildings.forEach(b => {
+    if (b.type === 'townCentre') {
+      ctx.fillStyle = '#8B8680';
+      ctx.fillRect(b.x - 60, b.y - 20, 120, 40);
+    }
+  });
+}
 
 window.addEventListener('load', () => {
   updateDisplay();
