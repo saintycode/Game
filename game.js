@@ -129,7 +129,34 @@ function getMaxSlotsFor(type) {
 function hasFreeSlot(type) {
   return workersAssigned[type] < getMaxSlotsFor(type);
 }
+function assignWorkerTo(type) {
+  if (villagers.idle <= 0) {
+    alert('No idle villagers available');
+    return;
+  }
 
+  const maxSlots = buildings[type] * buildingWorkSlots[type];
+  if (workersAssigned[type] >= maxSlots) {
+    alert(`No free ${type} work slots`);
+    return;
+  }
+
+  villagers.idle--;
+  villagers.working++;
+  workersAssigned[type]++;
+
+  updateDisplay();
+}
+
+function removeWorkerFrom(type) {
+  if (workersAssigned[type] <= 0) return;
+
+  workersAssigned[type]--;
+  villagers.working--;
+  villagers.idle++;
+
+  updateDisplay();
+}
 // ======================
 // Drawing
 // ======================
@@ -263,7 +290,7 @@ function updateWorkerUI() {
     const max = buildings[type] * buildingWorkSlots[type];
     const current = workersAssigned[type];
 
-    el.textContent = `Workers: ${current} / ${max}`;
+    el.textContent = ${current} / ${max}`;
   });
 }function updateWorkButtonState() {
   const btn = document.getElementById('send-villagers-work');
@@ -419,6 +446,26 @@ document.getElementById('build-farm')?.addEventListener('click', () => startPlac
 document.getElementById('build-logging')?.addEventListener('click', () => startPlacement('logging'));
 document.getElementById('build-market')?.addEventListener('click', () => startPlacement('market'));
 document.getElementById('build-tower')?.addEventListener('click', () => startPlacement('tower'));
+// Farm
+document.getElementById('farm-add-worker')
+  ?.addEventListener('click', () => assignWorkerTo('farm'));
+
+document.getElementById('farm-remove-worker')
+  ?.addEventListener('click', () => removeWorkerFrom('farm'));
+
+// Logging
+document.getElementById('logging-add-worker')
+  ?.addEventListener('click', () => assignWorkerTo('logging'));
+
+document.getElementById('logging-remove-worker')
+  ?.addEventListener('click', () => removeWorkerFrom('logging'));
+
+// Market
+document.getElementById('market-add-worker')
+  ?.addEventListener('click', () => assignWorkerTo('market'));
+
+document.getElementById('market-remove-worker')
+  ?.addEventListener('click', () => removeWorkerFrom('market'));
 
 // ======================
 // Villagers
