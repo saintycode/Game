@@ -24,7 +24,12 @@ let workersAssigned = {
   logging: 0,
   market: 0
 };
-
+const resourceLabels = {
+  wood: '🪵',
+  stone: '⛏️',
+  food: '🌾',
+  coin: '🪙'
+};
 // 1 resource per worker per tick (30s)
 const workerProduction = {
   farm: { food: 1 },
@@ -256,6 +261,21 @@ function drawAllBuildings() {
 // ======================
 // UI Updates
 // ======================
+function updateDisplay() {
+  const elements = {
+    wood: document.getElementById('wood'),
+    stone: document.getElementById('stone'),
+    food: document.getElementById('food'),
+    coin: document.getElementById('coin')
+  };
+
+  for (const key in elements) {
+    const el = elements[key];
+    if (!el) continue;
+
+    el.textContent = `${resourceLabels[key]}: ${Math.floor(resources[key])}`;
+  }
+}
 function updateDisplay() {
   const woodEl = document.getElementById('wood');
   const stoneEl = document.getElementById('stone');
