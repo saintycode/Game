@@ -111,7 +111,7 @@ h2 {
   margin-bottom: 16px;
 }
 
-/* ✅ “Span-like” card layout */
+/*  “Span-like” card layout */
 .cards-grid {
   display: flex;
   flex-wrap: wrap;
