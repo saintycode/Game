@@ -536,6 +536,11 @@ document.getElementById('send-villagers-Training')?.addEventListener('click', ()
 // ======================
 function initGame() {
   updateDisplay();
+
+  // ✅ Ensure town centre is drawn
   drawAllBuildings();
 }
-requestAnimationFrame(initGame);
+
+// Run after DOM + canvas are ready
+window.addEventListener('load', initGame);
+
