@@ -271,6 +271,7 @@ function updateWorkerUI() {
 
   btn.disabled = !hasSlots || villagers.idle === 0;
 }
+
 // ======================
 // Resource Generation
 // ======================
