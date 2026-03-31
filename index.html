@@ -8,17 +8,25 @@
 </head>
 <body>
     <h1>Welcome to the Simpleton</h1>
-    <div id="resources">
-        <h2>Resources</h2>
-       <span  <p id="wood">Wood: 0</p>
-        <p id="stone">Stone: 0</p>
-        <p id="coin">Coin: 0</p>
-        <p id="food">Food: 0</p>     </span>
-        <h2>Villagers</h2>
-       <span  <p id="villagers-idle">Idle: 2</p>
-        <p id="villagers-gathering">Gathering: 0</p>
-        <p id="villagers-working">Working: 0</p>
-        <p id="villagers-training">Training: 0</p> 
+<div id="resources">
+  <h2>Resources</h2>
+
+  <div class="resource-group">
+    <span id="wood">Wood: 0</span>
+    <span id="stone">Stone: 0</span>
+    <span id="coin">Coin: 0</span>
+    <span id="food">Food: 0</span>
+  </div>
+
+  <h2>Villagers</h2>
+
+  <div class="villager-group">
+    <span id="villagers-idle">Idle: 2</span>
+    <span id="villagers-gathering">Gathering: 0</span>
+    <span id="villagers-working">Working: 0</span>
+    <span id="villagers-training">Training: 0</span>
+  </div>
+</div>s-training">Training: 0</p> 
 </div>
     <div class="action-buttons">
   <button id="send-villagers">Send Villager to Gather</button>
@@ -28,7 +36,7 @@
   <button id="recall-villagers-work">Recall Villager From work</button>
         
     </div>
-    <canvas id="canvas" width="800" height="600"></canvas>
+    <canvas id="canvas" width="1200" height="800"></canvas>
     <div id="building-cards">
         
 <div id="building-cards">
