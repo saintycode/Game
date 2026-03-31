@@ -1,11 +1,5 @@
 /* ======================
-   Global Reset
-====================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+   Global Reset}   Global Reset
 
 /* ======================
    Page Layout
@@ -21,32 +15,34 @@ body {
 h1 {
   color: #fff;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 h2 {
   color: #fff;
-  margin: 20px 0 15px;
+  margin: 14px 0 10px;
   text-align: center;
 }
 
 /* ======================
-   Resources & Villagers
+   Resources & Villagers Panel
 ====================== */
 #resources {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 10px;
-  padding: 20px;
-  max-width: 420px;
-  margin: 0 auto 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  max-width: 520px;
+  margin: 0 auto 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  text-align: center;
 }
 
 .resource-group,
 .villager-group {
   display: inline-flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   font-size: 16px;
   font-weight: bold;
@@ -58,16 +54,16 @@ h2 {
 ====================== */
 .action-buttons {
   text-align: center;
-  margin: 20px 0;
+  margin: 10px 0 16px;
 }
 
 .action-buttons button {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   color: #fff;
   border: none;
-  padding: 10px 18px;
+  padding: 10px 16px;
   margin: 6px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s ease;
@@ -75,7 +71,7 @@ h2 {
 
 .action-buttons button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
+  box-shadow: 0 6px 12px rgba(46, 204, 113, 0.35);
 }
 
 .action-buttons button:disabled {
@@ -90,10 +86,10 @@ h2 {
 ====================== */
 #canvas {
   display: block;
-  margin: 20px auto;
+  margin: 12px auto 22px;
   background: #111;
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
 }
 
 /* ======================
@@ -102,9 +98,19 @@ h2 {
 #building-cards {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 10px;
-  padding: 30px;
+  padding: 22px;
   max-width: 1100px;
-  margin: 40px auto;
+  margin: 0 auto 30px;
+}
+
+#building-cards > h2 {
+  color: #111;
+  text-shadow: none;
+  margin-bottom: 16px;
+}
+
+/* ✅ “Span-like” card layout */
+.cards-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -132,7 +138,7 @@ h2 {
 
 .building-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.35);
   border-color: #764ba2;
 }
 
@@ -154,6 +160,7 @@ h2 {
   margin-bottom: 6px;
 }
 
+.building-card p,
 .building-card .cost {
   font-size: 13px;
   color: #666;
@@ -177,6 +184,7 @@ h2 {
   font-size: 14px;
   font-weight: bold;
   margin: 8px 0;
+  color: #333;
 }
 
 .worker-controls {
@@ -185,7 +193,6 @@ h2 {
   gap: 10px;
 }
 
-/* Hide worker UI for non-worker buildings */
 .no-workers .workers-row,
 .no-workers .worker-controls {
   visibility: hidden;
@@ -199,7 +206,7 @@ h2 {
   color: #fff;
   border: none;
   padding: 8px 14px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s ease;
@@ -207,7 +214,7 @@ h2 {
 
 .building-card button:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.35);
 }
 
 .building-card button:disabled {
@@ -221,17 +228,14 @@ h2 {
    Responsive
 ====================== */
 @media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-
-  .building-card {
-    width: 160px;
-    height: 300px;
-  }
-
-  #canvas {
-    width: 100%;
-    height: auto;
-  }
+  body { padding: 10px; }
+  #resources { max-width: 100%; }
+  .building-card { width: 160px; height: 300px; }
+  #canvas { width: 100%; height: auto; }
 }
+
+====================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
