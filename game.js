@@ -250,6 +250,27 @@ function updateDisplay() {
   if (workingEl) workingEl.textContent = `Working: ${villagers.working}`;
   if (trainingEl) trainingEl.textContent = `Training: ${villagers.training}`;
 }
+function updateWorkerUI() {
+  const mapping = ['farm', 'logging', 'market'];
+
+  mapping.forEach(type => {
+    const el = document.getElementById(`${type}-workers`);
+    if (!el) return;
+
+    const max = buildings[type] * buildingWorkSlots[type];
+    const current = workersAssigned[type];
+
+    el.textContent = `Workers: ${current} / ${max}`;
+  });
+}function updateWorkButtonState() {
+  const btn = document.getElementById('send-villagers-work');
+  if (!btn) return;
+
+  const hasSlots = ['farm','logging','market']
+    .some(t => workersAssigned[t] < buildings[t] * buildingWorkSlots[t]);
+
+  btn.disabled = !hasSlots || villagers.idle === 0;
+}
 
 // ======================
 // Resource Generation
@@ -457,7 +478,8 @@ document.getElementById('recall-villagers-work')?.addEventListener('click', () =
 document.getElementById('send-villagers-Training')?.addEventListener('click', () => {
   alert('Training feature coming next 👍');
 });
-
+updateWorkerUI();
+updateWorkButtonState();
 // ======================
 // Init
 // ======================
