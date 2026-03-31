@@ -142,7 +142,7 @@ function drawTownCentre(x, y) {
   ctx.fill();
 }
 
-// House (your existing, supports ghost)
+// House 
 function drawHouse(x, y, ghostMode = false, valid = true) {
   ctx.globalAlpha = ghostMode ? 0.55 : 1;
   ctx.fillStyle = valid ? '#A0522D' : '#FF0000';
@@ -459,7 +459,16 @@ document.getElementById('recall-villagers-work')?.addEventListener('click', () =
 
   updateDisplay();
 });
-
+document.getElementById('send-villagers')?.addEventListener('click', () => {
+    if (villagers.idle > 0) {
+        villagers.idle -= 1;
+        villagers.gathering += 1;
+        updateDisplay();
+        alert('1 villager sent to gather resources!');
+    } else {
+        alert('No idle villagers available!');
+    }
+});
 
 // ======================
 // Init
