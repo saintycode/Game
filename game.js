@@ -249,6 +249,9 @@ function updateDisplay() {
   if (gatheringEl) gatheringEl.textContent = `Gathering: ${villagers.gathering}`;
   if (workingEl) workingEl.textContent = `Working: ${villagers.working}`;
   if (trainingEl) trainingEl.textContent = `Training: ${villagers.training}`;
+
+  updateWorkerUI();
+updateWorkButtonState();
 }
 function updateWorkerUI() {
   const mapping = ['farm', 'logging', 'market'];
@@ -270,6 +273,7 @@ function updateWorkerUI() {
     .some(t => workersAssigned[t] < buildings[t] * buildingWorkSlots[t]);
 
   btn.disabled = !hasSlots || villagers.idle === 0;
+
 }
 
 // ======================
@@ -478,9 +482,8 @@ document.getElementById('recall-villagers-work')?.addEventListener('click', () =
 document.getElementById('send-villagers-Training')?.addEventListener('click', () => {
   alert('Training feature coming next 👍');
 });
-if (trainingEl) trainingEl.textContent = `Training: ${villagers.training}`;
-updateWorkerUI();
-updateWorkButtonState();
+
+
 // ======================
 // Init
 // ======================
