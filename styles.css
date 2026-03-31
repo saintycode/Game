@@ -241,5 +241,11 @@ h2 {
   .building-card { width: 160px; height: 300px; }
   #canvas { width: 100%; height: auto; }
 }
+#resources,#canvas,
+#building-cards {
+  margin-left: auto;
+  margin-right: auto;
+}
+.action-buttons,
 
 
