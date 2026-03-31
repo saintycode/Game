@@ -7,9 +7,8 @@
   box-sizing: border-box;
 }
 .page {
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
-  text-align: center;
 }
 
 body {
@@ -241,11 +240,11 @@ h2 {
   .building-card { width: 160px; height: 300px; }
   #canvas { width: 100%; height: auto; }
 }
-#resources,#canvas,
+#resources,
+.action-buttons,
+#canvas,
 #building-cards {
   margin-left: auto;
   margin-right: auto;
 }
-.action-buttons,
-
 
