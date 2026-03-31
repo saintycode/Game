@@ -1,7 +1,4 @@
 /* ======================
-   Global Reset}   Global Reset
-
-/* ======================
    Page Layout
 ====================== */
 body {
@@ -234,8 +231,4 @@ h2 {
   #canvas { width: 100%; height: auto; }
 }
 
-====================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+
