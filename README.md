@@ -20,7 +20,7 @@ A progressive web-based village building game where you manage resources, constr
 
 | Building | Cost | Production | Size | Notes |
 |----------|------|-----------|------|-------|
-| 🏠 Town Centre | 1F, 1W, 1S | 2 villages | 3x3 | Basic residential |
+| 🏠 Town Centre | Starting Building | 2 villages | 3x3 | Basic residential |
 | 🏠 House | 10F, 20W, 5S | 2 villages | 1x2 | Basic residential |
 | 🌾 Farm | 15F, 10W, 0S | 1F/sec | 2x3 | Food production |
 | 📦 Warehouse | 30G, 40W, 20S | None | 2x2 | Storage facility |
