@@ -290,7 +290,7 @@ function updateWorkerUI() {
     const max = buildings[type] * buildingWorkSlots[type];
     const current = workersAssigned[type];
 
-    el.textContent = `Workers: ${current} / ${max}`;
+    el.textContent = ${current} / ${max}`;
   });
 }function updateWorkButtonState() {
   const btn = document.getElementById('send-villagers-work');
