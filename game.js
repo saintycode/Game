@@ -32,10 +32,13 @@ let ghost = {
   visible: false
 };
 
+
+// ---- canvas ----
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 let placedBuildings = [{ type: 'townCentre', x: 400, y: 400 }];
+
 
 // ---------- UI ----------
   
@@ -105,6 +108,11 @@ document.getElementById('build-house')?.addEventListener('click', () => {
   placementMode.active = true;
   placementMode.type = 'house';
   ghost.visible = true;
+
+  // Make the ghost appear immediately in the centre
+  ghost.x = canvas.width / 2;
+  ghost.y = canvas.height / 2;
+  drawAllBuildings();
 });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -116,32 +124,21 @@ canvas.addEventListener('mousemove', (e) => {
 
   drawAllBuildings();
 });
-
 canvas.addEventListener('click', () => {
   if (!placementMode.active) return;
   if (placementMode.type !== 'house') return;
 
-  // ✅ Pay cost NOW
+  // Pay cost NOW
   resources.wood -= 10;
   resources.stone -= 5;
 
-  // ✅ Place house
-  placedBuildings.push({
-    type: 'house',
-    x: ghost.x,
-    y: ghost.y
-  });
-
+  placedBuildings.push({ type: 'house', x: ghost.x, y: ghost.y });
   buildings.house++;
   villagers.idle += 2;
 
-  // ✅ Update UI
   const houseCountEl = document.getElementById('house-count');
-  if (houseCountEl) {
-    houseCountEl.textContent = `Built: ${buildings.house}`;
-  }
+  if (houseCountEl) houseCountEl.textContent = `Built: ${buildings.house}`;
 
-  // ✅ Exit placement mode
   placementMode.active = false;
   placementMode.type = null;
   ghost.visible = false;
@@ -150,7 +147,17 @@ canvas.addEventListener('click', () => {
   drawAllBuildings();
 });
 
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!placementMode.active) return;
 
+  placementMode.active = false;
+  placementMode.type = null;
+  ghost.visible = false;
+
+  drawAllBuildings();
+});
+  
 
 // ---------- Resource Tick ----------
 setInterval(() => {
