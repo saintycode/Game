@@ -55,6 +55,47 @@ function updateDisplay() {
 }
 
 // ---------- Canvas Drawing buildings ----------
+// ======================
+// Placement + Collision
+// ======================
+
+// Placement state
+let placementMode = {
+  active: false,
+  type: null
+};
+
+// Ghost preview
+let ghost = {
+  x: 0,
+  y: 0,
+  visible: false,
+  valid: false
+};
+
+// Simple box collision check
+function collides(x, y, type) {
+  const size = type === 'townCentre'
+    ? { w: 120, h: 40 }
+    : { w: 50, h: 40 };
+
+  return placedBuildings.some(b => {
+    const otherSize = b.type === 'townCentre'
+      ? { w: 120, h: 40 }
+      : { w: 50, h: 40 };
+
+    return (
+      x - size.w / 2 < b.x + otherSize.w / 2 &&
+      x + size.w / 2 > b.x - otherSize.w / 2 &&
+      y - size.h / 2 < b.y + otherSize.h / 2 &&
+      y + size.h / 2 > b.y - otherSize.h / 2
+    );
+  });
+}
+
+// ======================
+// Draw everything
+// ======================
 function drawAllBuildings() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -71,16 +112,99 @@ function drawAllBuildings() {
     }
   });
 
-  // Draw ghost (preview)
+  // Draw ghost preview
   if (placementMode.active && ghost.visible) {
     ctx.save();
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = '#A0522D';
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = ghost.valid ? '#3CB371' : '#FF3333'; // ✅ green = valid, red = invalid
     ctx.fillRect(ghost.x - 25, ghost.y - 20, 50, 40);
     ctx.restore();
   }
 }
 
+// ======================
+// Build House → enter placement mode
+// ======================
+document.getElementById('build-house')?.addEventListener('click', () => {
+  if (resources.wood < 10 || resources.stone < 5) {
+    alert('Not enough resources');
+    return;
+  }
+
+  placementMode.active = true;
+  placementMode.type = 'house';
+  ghost.visible = true;
+
+  // Start ghost in centre
+  ghost.x = canvas.width / 2;
+  ghost.y = canvas.height / 2;
+  ghost.valid = !collides(ghost.x, ghost.y, 'house');
+
+  drawAllBuildings();
+});
+
+// ======================
+// Move ghost with mouse
+// ======================
+canvas.addEventListener('mousemove', (e) => {
+  if (!placementMode.active) return;
+
+  const rect = canvas.getBoundingClientRect();
+  ghost.x = e.clientX - rect.left;
+  ghost.y = e.clientY - rect.top;
+
+  ghost.valid = !collides(ghost.x, ghost.y, placementMode.type);
+
+  drawAllBuildings();
+});
+
+// ======================
+// Click canvas → place building
+// ======================
+canvas.addEventListener('click', () => {
+  if (!placementMode.active) return;
+  if (!ghost.valid) return;
+
+  // Pay cost
+  resources.wood -= 10;
+  resources.stone -= 5;
+
+  // Place house
+  placedBuildings.push({
+    type: placementMode.type,
+    x: ghost.x,
+    y: ghost.y
+  });
+
+  buildings.house++;
+  villagers.idle += 2;
+
+  const houseCountEl = document.getElementById('house-count');
+  if (houseCountEl) {
+    houseCountEl.textContent = `Built: ${buildings.house}`;
+  }
+
+  placementMode.active = false;
+  placementMode.type = null;
+  ghost.visible = false;
+
+  updateDisplay();
+  drawAllBuildings();
+});
+
+// ======================
+// ESC cancels placement
+// ======================
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!placementMode.active) return;
+
+  placementMode.active = false;
+  placementMode.type = null;
+  ghost.visible = false;
+
+  drawAllBuildings();
+});
 
 
 // ---------- Buttons ----------
@@ -98,65 +222,6 @@ document.getElementById('recall-villagers')?.addEventListener('click', () => {
   updateDisplay();
 });
 
-//------- Build building ------
-document.getElementById('build-house')?.addEventListener('click', () => {
-  if (resources.wood < 10 || resources.stone < 5) {
-    alert('Not enough resources');
-    return;
-  }
-
-  placementMode.active = true;
-  placementMode.type = 'house';
-  ghost.visible = true;
-
-  // Make the ghost appear immediately in the centre
-  ghost.x = canvas.width / 2;
-  ghost.y = canvas.height / 2;
-  drawAllBuildings();
-});
-
-canvas.addEventListener('mousemove', (e) => {
-  if (!placementMode.active) return;
-
-  const rect = canvas.getBoundingClientRect();
-  ghost.x = e.clientX - rect.left;
-  ghost.y = e.clientY - rect.top;
-
-  drawAllBuildings();
-});
-canvas.addEventListener('click', () => {
-  if (!placementMode.active) return;
-  if (placementMode.type !== 'house') return;
-
-  // Pay cost NOW
-  resources.wood -= 10;
-  resources.stone -= 5;
-
-  placedBuildings.push({ type: 'house', x: ghost.x, y: ghost.y });
-  buildings.house++;
-  villagers.idle += 2;
-
-  const houseCountEl = document.getElementById('house-count');
-  if (houseCountEl) houseCountEl.textContent = `Built: ${buildings.house}`;
-
-  placementMode.active = false;
-  placementMode.type = null;
-  ghost.visible = false;
-
-  updateDisplay();
-  drawAllBuildings();
-});
-
-window.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
-  if (!placementMode.active) return;
-
-  placementMode.active = false;
-  placementMode.type = null;
-  ghost.visible = false;
-
-  drawAllBuildings();
-});
   
 
 // ---------- Resource Tick ----------
