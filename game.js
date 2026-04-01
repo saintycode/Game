@@ -91,16 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
       onBuild: () => {}
     },
 
-  tower: {
-    label:, stone: 20, food: 0, coin: 10 },  label: 'Guard Tower',
-    size: { w: 70, h: 90 },
-    sprite: 'images/guard-tower.png',
+  tower: {tower  label: 'Guard Tower',
+  cost: { wood: 30, stone: 20, food: 0, coin: 10 },
+  size: { w: 70, h: 90 },
+  sprite: 'images/guard-tower.png',
 
-    // ✅ training slots instead of workers
-    trainingSlots: 2,        // per tower
-    trainingTimeMs: 5000,    // 5 seconds per villager (tweak later)
-    onBuild: () => {}
-  }
+  // ✅ training instead of workers
+  trainingSlots: 2,        // per tower
+  trainingTimeMs: 5000,    // 5 seconds per villager
+  onBuild: () => {}
+}
+
+
   };
 
   // Which DOM element holds "Built: X" for each building type
