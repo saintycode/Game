@@ -2,17 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ----game stats start -----
 let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
   
-let placementMode = {let x: 0,
-  y: 0,
-  visible: false
-};
-``
-  active: false,
-  type: null
-};
-
-let ghost = {
-
 let buildings = {
   townCentre: 1,
   house: 0,
