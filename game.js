@@ -65,24 +65,23 @@ let ghost = {
 };
 
 // Simple box collision check
-function collides(x, y, type) {
+  function withinBounds(x, y, type) {
   const size = type === 'townCentre'
     ? { w: 120, h: 40 }
     : { w: 50, h: 40 };
-
   return placedBuildings.some(b => {
     const otherSize = b.type === 'townCentre'
       ? { w: 120, h: 40 }
       : { w: 50, h: 40 };
+  return (
+    x - size.w / 2 >= 0 &&
+    x + size.w / 2 <= canvas.width &&
+    y - size.h / 2 >= 0 &&
+    y + size.h / 2 <= canvas.height
+  );
+ });
+} 
 
-    return (
-      x - size.w / 2 < b.x + otherSize.w / 2 &&
-      x + size.w / 2 > b.x - otherSize.w / 2 &&
-      y - size.h / 2 < b.y + otherSize.h / 2 &&
-      y + size.h / 2 > b.y - otherSize.h / 2
-    );
-  });
-}
 
 // ======================
 // Draw everything
@@ -137,19 +136,21 @@ document.getElementById('build-house')?.addEventListener('click', () => {
 // ======================
 // Move ghost with mouse
 // ======================
-canvas.addEventListener('mousemove', (e) => {
+  canvas.addEventListener('mousemove', (e) => {
   if (!placementMode.active) return;
 
   const rect = canvas.getBoundingClientRect();
 
-  // ✅ snap ghost to grid
   ghost.x = snapToGrid(e.clientX - rect.left);
   ghost.y = snapToGrid(e.clientY - rect.top);
 
-  ghost.valid = !collides(ghost.x, ghost.y, placementMode.type);
+  ghost.valid =
+    withinBounds(ghost.x, ghost.y, placementMode.type) &&
+    !collides(ghost.x, ghost.y, placementMode.type);
 
   drawAllBuildings();
 });
+
 // ======================
 // Click canvas → place building
 // ======================
