@@ -65,19 +65,18 @@ let ghost = {
 };
 
 // Simple box collision check
-  function withinBounds(x, y, type) {
+function withinBounds(x, y, type) {
   const size = type === 'townCentre'
     ? { w: 120, h: 40 }
     : { w: 50, h: 40 };
-    
-    
+
   return (
     x - size.w / 2 >= 0 &&
     x + size.w / 2 <= canvas.width &&
     y - size.h / 2 >= 0 &&
     y + size.h / 2 <= canvas.height
   );
-} 
+}
 
 
 // ======================
