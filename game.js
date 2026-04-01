@@ -70,10 +70,6 @@ let ghost = {
     ? { w: 120, h: 40 }
     : { w: 50, h: 40 };
     
-  return placedBuildings.some(b => {
-    const otherSize = b.type === 'townCentre'
-      ? { w: 120, h: 40 }
-      : { w: 50, h: 40 };
     
   return (
     x - size.w / 2 >= 0 &&
@@ -81,7 +77,6 @@ let ghost = {
     y - size.h / 2 >= 0 &&
     y + size.h / 2 <= canvas.height
   );
- };
 } 
 
 
