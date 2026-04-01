@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
       onBuild: () => {}
     },
 
-  tower: {tower  label: 'Guard Tower',
+  tower: {
+  label: 'Guard Tower',
   cost: { wood: 30, stone: 20, food: 0, coin: 10 },
   size: { w: 70, h: 90 },
   sprite: 'images/guard-tower.png',
