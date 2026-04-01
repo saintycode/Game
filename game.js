@@ -20,6 +20,18 @@ const workerProduction = {
   market: { coin: 1 }
 };
 
+// ---- placement state ----
+let placementMode = {
+  active: false,
+  type: null
+};
+
+let ghost = {
+  x: 0,
+  y: 0,
+  visible: false
+};
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
