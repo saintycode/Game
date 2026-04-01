@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-
+// ----game stats start -----
 let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
+  
+let placementMode = {let x: 0,
+  y: 0,
+  visible: false
+};
+``
+  active: false,
+  type: null
+};
+
+let ghost = {
 
 let buildings = {
   townCentre: 1,
@@ -26,6 +37,7 @@ const ctx = canvas.getContext('2d');
 let placedBuildings = [{ type: 'townCentre', x: 400, y: 400 }];
 
 // ---------- UI ----------
+  
 function updateDisplay() {
   document.getElementById('food').textContent = `🌾:${resources.food}`;
   document.getElementById('wood').textContent = `🪵:${resources.wood}`;
@@ -77,28 +89,52 @@ document.getElementById('build-house')?.addEventListener('click', () => {
     return;
   }
 
+  placementMode.active = true;
+  placementMode.type = 'house';
+  ghost.visible = true;
+});
+canvas.addEventListener('mousemove', (e) => {
+  if (!placementMode.active) return;
+
+  const rect = canvas.getBoundingClientRect();
+  ghost.x = e.clientX - rect.left;
+  ghost.y = e.clientY - rect.top;
+
+  drawAllBuildings();
+});
+canvas.addEventListener('click', () => {
+  if (!placementMode.active) return;
+  if (placementMode.type !== 'house') return;
+
+  // ✅ Pay cost NOW
   resources.wood -= 10;
   resources.stone -= 5;
+
+  // ✅ Place house
+  placedBuildings.push({
+    type: 'house',
+    x: ghost.x,
+    y: ghost.y
+  });
 
   buildings.house++;
   villagers.idle += 2;
 
-  // ✅ Add house to the map (simple placement for now)
-  placedBuildings.push({
-    type: 'house',
-    x: 400 + (buildings.house * 40),
-    y: 460
-  });
-
-  // ✅ Update Built counter
+  // ✅ Update UI
   const houseCountEl = document.getElementById('house-count');
   if (houseCountEl) {
     houseCountEl.textContent = `Built: ${buildings.house}`;
   }
 
+  // ✅ Exit placement mode
+  placementMode.active = false;
+  placementMode.type = null;
+  ghost.visible = false;
+
   updateDisplay();
   drawAllBuildings();
 });
+
 
 
 // ---------- Resource Tick ----------
