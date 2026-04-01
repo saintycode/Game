@@ -1,248 +1,470 @@
 document.addEventListener('DOMContentLoaded', () => {
-// ----game stats start -----
-let resources = { wood: 10, stone: 10, food: 10, coin: 0 };
-  
-let buildings = {
-  townCentre: 1,
-  house: 0,
-  farm: 0,
-  logging: 0,
-  market: 0,
-  tower: 0
-};
+  // =========================================================
+  // 1) GAME STATE (numbers that change during play)
+  // =========================================================
+  const resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
-let villagers = { idle: 2, gathering: 0, working: 0, training: 0 };
-let workersAssigned = { farm: 0, logging: 0, market: 0 };
-  
-const GRID_SIZE = 20;
-const workerProduction = {
-  farm: { food: 1 },
-  logging: { wood: 1 },
-  market: { coin: 1 }
-};
+  const buildings = {
+    townCentre: 1,
+    house: 0,
+    farm: 0,
+    logging: 0,
+    market: 0,
+    tower: 0
+  };
 
+  const villagers = { idle: 2, gathering: 0, working: 0, training: 0 };
 
-// ---- canvas ----
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+  // How many workers are assigned to each workplace type
+  const workersAssigned = { farm: 0, logging: 0, market: 0 };
 
-let placedBuildings = [{ type: 'townCentre', x: 400, y: 400 }];
+  // =========================================================
+  // 2) CANVAS + GRID
+  // =========================================================
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
 
+  const GRID_SIZE = 20; // change to 16/32 later if you want a different feel
 
-// ---------- UI Helper functions ----------
-  
-function updateDisplay() {
-  document.getElementById('food').textContent = `🌾:${resources.food}`;
-  document.getElementById('wood').textContent = `🪵:${resources.wood}`;
-  document.getElementById('stone').textContent = `⛏️:${resources.stone}`;
-  document.getElementById('coin').textContent = `🪙:${resources.coin}`;
+  const snapToGrid = (v) => Math.round(v / GRID_SIZE) * GRID_SIZE;
 
-  document.getElementById('villagers-idle').textContent = `Idle: ${villagers.idle}`;
-  document.getElementById('villagers-gathering').textContent = `Gathering: ${villagers.gathering}`;
-  document.getElementById('villagers-working').textContent = `Working: ${villagers.working}`;
-  document.getElementById('villagers-training').textContent = `Training: ${villagers.training}`;
-}
-function snapToGrid(value) {
-  return Math.round(value / GRID_SIZE) * GRID_SIZE;
-}
-// ---------- Canvas Drawing buildings ----------
-// ======================
-// Placement + Collision
-// ======================
+  // =========================================================
+  // 3) BUILDING DEFINITIONS (edit here to add new buildings)
+  //    - cost: resources required to build
+  //    - size: used for collision + bounds + drawing size
+  //    - sprite: image path
+  //    - workerSlots: how many workers each building can hold (0 = none)
+  //    - productionPerWorker: resource output per worker per tick
+  //    - onBuild: special effect when built
+  // =========================================================
+  const BUILDINGS = {
+    townCentre: {
+      label: 'Town Centre',
+      cost: { wood: 0, stone: 0, food: 0, coin: 0 },
+      size: { w: 120, h: 80 }, // bigger so the sprite reads well
+      sprite: 'images/town-centre.png',
+      workerSlots: 0,
+      productionPerWorker: {},
+      onBuild: () => {}
+    },
 
-// Placement state
-let placementMode = {
-  active: false,
-  type: null
-};
+    house: {
+      label: 'House',
+      cost: { wood: 10, stone: 5, food: 0, coin: 0 },
+      size: { w: 70, h: 70 },
+      sprite: 'images/house.png',
+      workerSlots: 0,
+      productionPerWorker: {},
+      onBuild: () => {
+        // House bonus: +2 idle villagers
+        villagers.idle += 2;
+      }
+    },
 
-// Ghost preview
-let ghost = {
-  x: 0,
-  y: 0,
-  visible: false,
-  valid: false
-};
+    farm: {
+      label: 'Farm',
+      cost: { wood: 15, stone: 7, food: 0, coin: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/farm.png',
+      workerSlots: 2,
+      productionPerWorker: { food: 1 },
+      onBuild: () => {}
+    },
 
-// ======================
-// Bounds + Collision Helpers
-// ======================
+    logging: {
+      label: 'Logging',
+      cost: { wood: 20, stone: 10, food: 0, coin: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/logging.png',
+      workerSlots: 2,
+      productionPerWorker: { wood: 1 },
+      onBuild: () => {}
+    },
 
-function getFootprint(type) {
-  if (type === 'townCentre') return { w: 120, h: 40 };
-  if (type === 'house') return { w: 50, h: 40 };
-  return { w: 50, h: 40 }; // default for future buildings
-}
+    market: {
+      label: 'Market',
+      cost: { wood: 25, stone: 15, food: 0, coin: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/market.png',
+      workerSlots: 2,
+      productionPerWorker: { coin: 1 },
+      onBuild: () => {}
+    },
 
-function withinBounds(x, y, type) {
-  const { w, h } = getFootprint(type);
+    tower: {
+      label: 'Guard Tower',
+      cost: { wood: 30, stone: 20, food: 0, coin: 10 },
+      size: { w: 70, h: 90 },
+      sprite: 'images/guard-tower.png',
+      workerSlots: 0,
+      productionPerWorker: {},
+      onBuild: () => {}
+    }
+  };
 
-  return (
-    x - w / 2 >= 0 &&
-    x + w / 2 <= canvas.width &&
-    y - h / 2 >= 0 &&
-    y + h / 2 <= canvas.height
-  );
-}
+  // Which DOM element holds "Built: X" for each building type
+  const COUNT_ID = {
+    house: 'house-count',
+    farm: 'farm-count',
+    logging: 'logging-count',
+    market: 'market-count',
+    tower: 'tower-count'
+  };
 
-function collides(x, y, type) {
-  const a = getFootprint(type);
+  // Worker UI elements in your cards
+  const WORKER_UI = {
+    farm: 'farm-workers',
+    logging: 'logging-workers',
+    market: 'market-workers'
+  };
 
-  return placedBuildings.some(b => {
-    const c = getFootprint(b.type);
+  // =========================================================
+  // 4) SPRITE LOADING (images)
+  // =========================================================
+  const sprites = {};
 
+  function loadSprites() {
+    Object.keys(BUILDINGS).forEach((type) => {
+      const img = new Image();
+      img.onload = () => drawAll(); // redraw as soon as each sprite arrives
+      img.src = BUILDINGS[type].sprite;
+      sprites[type] = img;
+    });
+  }
+
+  // =========================================================
+  // 5) WORLD STATE (what is placed on the canvas)
+  // =========================================================
+  const placedBuildings = [
+    { type: 'townCentre', x: 400, y: 400 } // starting building
+  ];
+
+  // =========================================================
+  // 6) PLACEMENT MODE + GHOST
+  // =========================================================
+  const placementMode = { active: false, type: null };
+
+  const ghost = { x: 0, y: 0, visible: false, valid: false };
+
+  function getFootprint(type) {
+    return BUILDINGS[type].size;
+  }
+
+  function withinBounds(x, y, type) {
+    const { w, h } = getFootprint(type);
     return (
-      x - a.w / 2 < b.x + c.w / 2 &&
-      x + a.w / 2 > b.x - c.w / 2 &&
-      y - a.h / 2 < b.y + c.h / 2 &&
-      y + a.h / 2 > b.y - c.h / 2
+      x - w / 2 >= 0 &&
+      x + w / 2 <= canvas.width &&
+      y - h / 2 >= 0 &&
+      y + h / 2 <= canvas.height
     );
-  });
-}
-
-
-// ======================
-// Draw everything
-// ======================
-function drawAllBuildings() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Draw placed buildings
-  placedBuildings.forEach(b => {
-    if (b.type === 'townCentre') {
-      ctx.fillStyle = '#8B8680';
-      ctx.fillRect(b.x - 60, b.y - 20, 120, 40);
-    }
-
-    if (b.type === 'house') {
-      ctx.fillStyle = '#A0522D';
-      ctx.fillRect(b.x - 25, b.y - 20, 50, 40);
-    }
-  });
-
-  // Draw ghost preview
-  if (placementMode.active && ghost.visible) {
-    ctx.save();
-    ctx.globalAlpha = 0.6;
-    ctx.fillStyle = ghost.valid ? '#3CB371' : '#FF3333'; // ✅ green = valid, red = invalid
-    ctx.fillRect(ghost.x - 25, ghost.y - 20, 50, 40);
-    ctx.restore();
-  }
-}
-
-// ======================
-// Build House → enter placement mode
-// ======================
-document.getElementById('build-house')?.addEventListener('click', () => {
-  if (resources.wood < 10 || resources.stone < 5) {
-    alert('Not enough resources');
-    return;
   }
 
-  placementMode.active = true;
-  placementMode.type = 'house';
-  ghost.visible = true;
+  function collides(x, y, type) {
+    const a = getFootprint(type);
+    return placedBuildings.some((b) => {
+      const c = getFootprint(b.type);
+      return (
+        x - a.w / 2 < b.x + c.w / 2 &&
+        x + a.w / 2 > b.x - c.w / 2 &&
+        y - a.h / 2 < b.y + c.h / 2 &&
+        y + a.h / 2 > b.y - c.h / 2
+      );
+    });
+  }
 
-  // Start ghost in centre
-  ghost.x = canvas.width / 2;
-  ghost.y = canvas.height / 2;
-  ghost.valid = !collides(ghost.x, ghost.y, 'house');
+  function canPlace(x, y, type) {
+    return withinBounds(x, y, type) && !collides(x, y, type);
+  }
 
-  drawAllBuildings();
-});
+  // =========================================================
+  // 7) UI UPDATE FUNCTIONS
+  // =========================================================
+  function updateResourceUI() {
+    const foodEl = document.getElementById('food');
+    const woodEl = document.getElementById('wood');
+    const stoneEl = document.getElementById('stone');
+    const coinEl = document.getElementById('coin');
 
-// ======================
-// Move ghost with mouse
-// ======================
+    if (foodEl) foodEl.textContent = `🌾:${Math.floor(resources.food)}`;
+    if (woodEl) woodEl.textContent = `🪵:${Math.floor(resources.wood)}`;
+    if (stoneEl) stoneEl.textContent = `⛏️:${Math.floor(resources.stone)}`;
+    if (coinEl) coinEl.textContent = `🪙:${Math.floor(resources.coin)}`;
+  }
+
+  function updateVillagerUI() {
+    const idleEl = document.getElementById('villagers-idle');
+    const gatheringEl = document.getElementById('villagers-gathering');
+    const workingEl = document.getElementById('villagers-working');
+    const trainingEl = document.getElementById('villagers-training');
+
+    if (idleEl) idleEl.textContent = `Idle: ${villagers.idle}`;
+    if (gatheringEl) gatheringEl.textContent = `Gathering: ${villagers.gathering}`;
+    if (workingEl) workingEl.textContent = `Working: ${villagers.working}`;
+    if (trainingEl) trainingEl.textContent = `Training: ${villagers.training}`;
+  }
+
+  function updateWorkerUI() {
+    Object.keys(WORKER_UI).forEach((type) => {
+      const el = document.getElementById(WORKER_UI[type]);
+      if (!el) return;
+
+      const max = buildings[type] * BUILDINGS[type].workerSlots;
+      const cur = workersAssigned[type];
+      el.textContent = `${cur} / ${max}`;
+    });
+  }
+
+  function updateWorkerButtons() {
+    ['farm', 'logging', 'market'].forEach((type) => {
+      const addBtn = document.getElementById(`${type}-add-worker`);
+      const removeBtn = document.getElementById(`${type}-remove-worker`);
+
+      const max = buildings[type] * BUILDINGS[type].workerSlots;
+      const cur = workersAssigned[type];
+
+      if (addBtn) addBtn.disabled = villagers.idle === 0 || cur >= max;
+      if (removeBtn) removeBtn.disabled = cur === 0;
+    });
+  }
+
+  function updateDisplay() {
+    updateResourceUI();
+    updateVillagerUI();
+    updateWorkerUI();
+    updateWorkerButtons();
+  }
+
+  // =========================================================
+  // 8) DRAWING (sprites + ghost)
+  // =========================================================
+  function drawBuildingSprite(type, x, y) {
+    const img = sprites[type];
+    const { w, h } = getFootprint(type);
+
+    // If sprite hasn't loaded yet, draw a placeholder box so you still see something.
+    if (!img || !img.complete) {
+      ctx.fillStyle = '#999';
+      ctx.fillRect(x - w / 2, y - h / 2, w, h);
+      return;
+    }
+
+    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+  }
+
+  function drawAll() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw placed buildings
+    placedBuildings.forEach((b) => drawBuildingSprite(b.type, b.x, b.y));
+
+    // Draw ghost preview (green overlay if valid, red overlay if invalid)
+    if (placementMode.active && ghost.visible) {
+      drawBuildingSprite(placementMode.type, ghost.x, ghost.y);
+
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = ghost.valid ? '#3CB371' : '#FF3333';
+      const { w, h } = getFootprint(placementMode.type);
+      ctx.fillRect(ghost.x - w / 2, ghost.y - h / 2, w, h);
+      ctx.restore();
+    }
+  }
+
+  // =========================================================
+  // 9) BUILD FLOW (enter placement mode from a card)
+  // =========================================================
+  function hasResources(cost) {
+    return Object.keys(cost).every((r) => (resources[r] ?? 0) >= cost[r]);
+  }
+
+  function payCost(cost) {
+    Object.keys(cost).forEach((r) => {
+      resources[r] -= cost[r];
+    });
+  }
+
+  function startPlacement(type) {
+    const def = BUILDINGS[type];
+
+    // Example rule: only one market allowed (easy to remove if you want)
+    if (type === 'market' && buildings.market > 0) {
+      alert('Only one market allowed');
+      return;
+    }
+
+    if (!hasResources(def.cost)) {
+      alert('Not enough resources');
+      return;
+    }
+
+    placementMode.active = true;
+    placementMode.type = type;
+    ghost.visible = true;
+
+    ghost.x = snapToGrid(canvas.width / 2);
+    ghost.y = snapToGrid(canvas.height / 2);
+    ghost.valid = canPlace(ghost.x, ghost.y, type);
+
+    drawAll();
+  }
+
+  // =========================================================
+  // 10) INPUT: mousemove / click / escape
+  // =========================================================
   canvas.addEventListener('mousemove', (e) => {
-  if (!placementMode.active) return;
+    if (!placementMode.active) return;
 
-  const rect = canvas.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
+    ghost.x = snapToGrid(e.clientX - rect.left);
+    ghost.y = snapToGrid(e.clientY - rect.top);
 
-  ghost.x = snapToGrid(e.clientX - rect.left);
-  ghost.y = snapToGrid(e.clientY - rect.top);
-
-  ghost.valid =
-    withinBounds(ghost.x, ghost.y, placementMode.type) &&
-    !collides(ghost.x, ghost.y, placementMode.type);
-
-  drawAllBuildings();
-});
-
-// ======================
-// Click canvas → place building
-// ======================
-canvas.addEventListener('click', () => {
-  if (!placementMode.active) return;
-  if (!ghost.valid) return;
-
-  // Pay cost
-  resources.wood -= 10;
-  resources.stone -= 5;
-
-  // Place house
-  placedBuildings.push({
-    type: placementMode.type,
-    x: ghost.x,
-    y: ghost.y
+    ghost.valid = canPlace(ghost.x, ghost.y, placementMode.type);
+    drawAll();
   });
 
-  buildings.house++;
-  villagers.idle += 2;
+  canvas.addEventListener('mouseleave', () => {
+    if (!placementMode.active) return;
+    ghost.visible = false;
+    drawAll();
+  });
 
-  const houseCountEl = document.getElementById('house-count');
-  if (houseCountEl) {
-    houseCountEl.textContent = `Built: ${buildings.house}`;
+  canvas.addEventListener('mouseenter', () => {
+    if (!placementMode.active) return;
+    ghost.visible = true;
+    drawAll();
+  });
+
+  canvas.addEventListener('click', () => {
+    if (!placementMode.active || !ghost.valid) return;
+
+    const type = placementMode.type;
+    const def = BUILDINGS[type];
+
+    payCost(def.cost);
+
+    placedBuildings.push({ type, x: ghost.x, y: ghost.y });
+    buildings[type]++;
+
+    // run special build effects (e.g. house adds villagers)
+    def.onBuild?.();
+
+    // update built counter in the card (if it has one)
+    const countId = COUNT_ID[type];
+    if (countId) {
+      const el = document.getElementById(countId);
+      if (el) el.textContent = `Built: ${buildings[type]}`;
+    }
+
+    placementMode.active = false;
+    placementMode.type = null;
+    ghost.visible = false;
+
+    updateDisplay();
+    drawAll();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!placementMode.active) return;
+
+    placementMode.active = false;
+    placementMode.type = null;
+    ghost.visible = false;
+
+    drawAll();
+  });
+
+  // =========================================================
+  // 11) BUTTONS (villagers + build cards + workers)
+  // =========================================================
+
+  // Villagers: gathering
+  document.getElementById('send-villagers')?.addEventListener('click', () => {
+    if (villagers.idle <= 0) return alert('No idle villagers available!');
+    villagers.idle--;
+    villagers.gathering++;
+    updateDisplay();
+  });
+
+  document.getElementById('recall-villagers')?.addEventListener('click', () => {
+    if (villagers.gathering <= 0) return;
+    villagers.gathering--;
+    villagers.idle++;
+    updateDisplay();
+  });
+
+  // Training placeholder
+  document.getElementById('send-villagers-training')?.addEventListener('click', () => {
+    alert('Training feature coming next 👍');
+  });
+
+  // Build buttons (cards)
+  document.getElementById('build-house')?.addEventListener('click', () => startPlacement('house'));
+  document.getElementById('build-farm')?.addEventListener('click', () => startPlacement('farm'));
+  document.getElementById('build-logging')?.addEventListener('click', () => startPlacement('logging'));
+  document.getElementById('build-market')?.addEventListener('click', () => startPlacement('market'));
+  document.getElementById('build-tower')?.addEventListener('click', () => startPlacement('tower'));
+
+  // Worker + / -
+  function assignWorkerTo(type) {
+    const max = buildings[type] * BUILDINGS[type].workerSlots;
+    if (villagers.idle <= 0) return alert('No idle villagers available');
+    if (workersAssigned[type] >= max) return alert('No free work slots');
+
+    villagers.idle--;
+    villagers.working++;
+    workersAssigned[type]++;
+    updateDisplay();
   }
 
-  placementMode.active = false;
-  placementMode.type = null;
-  ghost.visible = false;
+  function removeWorkerFrom(type) {
+    if (workersAssigned[type] <= 0) return;
+    workersAssigned[type]--;
+    villagers.working--;
+    villagers.idle++;
+    updateDisplay();
+  }
 
+  document.getElementById('farm-add-worker')?.addEventListener('click', () => assignWorkerTo('farm'));
+  document.getElementById('farm-remove-worker')?.addEventListener('click', () => removeWorkerFrom('farm'));
+  document.getElementById('logging-add-worker')?.addEventListener('click', () => assignWorkerTo('logging'));
+  document.getElementById('logging-remove-worker')?.addEventListener('click', () => removeWorkerFrom('logging'));
+  document.getElementById('market-add-worker')?.addEventListener('click', () => assignWorkerTo('market'));
+  document.getElementById('market-remove-worker')?.addEventListener('click', () => removeWorkerFrom('market'));
+
+  // =========================================================
+  // 12) RESOURCE TICK (simple + predictable)
+  // =========================================================
+  // Every tick:
+  // - gathering villagers generate basic resources
+  // - working villagers generate building-specific resources
+  // - you can tweak numbers here later
+  setInterval(() => {
+    // Gathering
+    resources.wood += villagers.gathering * 1;
+    resources.stone += villagers.gathering * 1;
+    resources.food += villagers.gathering * 1;
+
+    // Working (per building type)
+    Object.keys(workersAssigned).forEach((type) => {
+      const count = workersAssigned[type];
+      if (count <= 0) return;
+
+      const prod = BUILDINGS[type].productionPerWorker;
+      Object.keys(prod).forEach((res) => {
+        resources[res] += prod[res] * count;
+      });
+    });
+
+    updateDisplay();
+  }, 3000);
+
+  // =========================================================
+  // 13) INIT
+  // =========================================================
+  loadSprites();
   updateDisplay();
-  drawAllBuildings();
+  drawAll();
 });
-
-// ======================
-// ESC cancels placement
-// ======================
-window.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
-  if (!placementMode.active) return;
-
-  placementMode.active = false;
-  placementMode.type = null;
-  ghost.visible = false;
-
-  drawAllBuildings();
-});
-
-
-// ---------- Buttons ----------
-document.getElementById('send-villagers')?.addEventListener('click', () => {
-  if (villagers.idle <= 0) return;
-  villagers.idle--;
-  villagers.gathering++;
-  updateDisplay();
-});
-
-document.getElementById('recall-villagers')?.addEventListener('click', () => {
-  if (villagers.gathering <= 0) return;
-  villagers.gathering--;
-  villagers.idle++;
-  updateDisplay();
-});
-
-  
-
-// ---------- Resource Tick ----------
-setInterval(() => {
-  resources.food += villagers.gathering;
-  updateDisplay();
-}, 3000);
-
-// ---------- Init ----------
-updateDisplay();
-drawAllBuildings();
-
-});
+``
