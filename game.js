@@ -54,6 +54,7 @@ function updateDisplay() {
 function drawAllBuildings() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Draw placed buildings
   placedBuildings.forEach(b => {
     if (b.type === 'townCentre') {
       ctx.fillStyle = '#8B8680';
@@ -65,7 +66,17 @@ function drawAllBuildings() {
       ctx.fillRect(b.x - 25, b.y - 20, 50, 40);
     }
   });
+
+  // Draw ghost (preview)
+  if (placementMode.active && ghost.visible) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#A0522D';
+    ctx.fillRect(ghost.x - 25, ghost.y - 20, 50, 40);
+    ctx.restore();
+  }
 }
+
 
 
 // ---------- Buttons ----------
@@ -82,6 +93,7 @@ document.getElementById('recall-villagers')?.addEventListener('click', () => {
   villagers.idle++;
   updateDisplay();
 });
+
 //------- Build building ------
 document.getElementById('build-house')?.addEventListener('click', () => {
   if (resources.wood < 10 || resources.stone < 5) {
@@ -93,6 +105,7 @@ document.getElementById('build-house')?.addEventListener('click', () => {
   placementMode.type = 'house';
   ghost.visible = true;
 });
+
 canvas.addEventListener('mousemove', (e) => {
   if (!placementMode.active) return;
 
@@ -102,6 +115,7 @@ canvas.addEventListener('mousemove', (e) => {
 
   drawAllBuildings();
 });
+
 canvas.addEventListener('click', () => {
   if (!placementMode.active) return;
   if (placementMode.type !== 'house') return;
