@@ -64,8 +64,13 @@ let ghost = {
   valid: false
 };
 
-// Simple box collision check
-// ======================40 };
+// ======================
+// Bounds + Collision Helpers
+// ======================
+
+function getFootprint(type) {
+  if (type === 'townCentre') return { w: 120, h: 40 };
+  if (type === 'house') return { w: 50, h: 40 };
   return { w: 50, h: 40 }; // default for future buildings
 }
 
@@ -94,11 +99,6 @@ function collides(x, y, type) {
     );
   });
 }
-// Bounds + Collision Helpers
-// ======================
-
-function getFootprint(type) {
-  if (type === 'townCentre') return { w: 120, h: 40 };
 
 
 // ======================
