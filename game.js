@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const villagers = { idle: 2, gathering: 0, working: 0, training: 0 };
-
+  const trainingQueue = [];
   // How many workers are assigned to each workplace type
   const workersAssigned = { farm: 0, logging: 0, market: 0 };
 
@@ -91,15 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
       onBuild: () => {}
     },
 
-    tower: {
-      label: 'Guard Tower',
-      cost: { wood: 30, stone: 20, food: 0, coin: 10 },
-      size: { w: 70, h: 90 },
-      sprite: 'images/guard-tower.png',
-      workerSlots: 0,
-      productionPerWorker: {},
-      onBuild: () => {}
-    }
+  tower: {
+    label:, stone: 20, food: 0, coin: 10 },  label: 'Guard Tower',
+    size: { w: 70, h: 90 },
+    sprite: 'images/guard-tower.png',
+
+    // ✅ training slots instead of workers
+    trainingSlots: 2,        // per tower
+    trainingTimeMs: 5000,    // 5 seconds per villager (tweak later)
+    onBuild: () => {}
+  }
   };
 
   // Which DOM element holds "Built: X" for each building type
@@ -393,11 +394,45 @@ document.addEventListener('DOMContentLoaded', () => {
     villagers.idle++;
     updateDisplay();
   });
-
-  // Training placeholder
+  // Villagers: traning for guard 
   document.getElementById('send-villagers-training')?.addEventListener('click', () => {
-    alert('Training feature coming next 👍');
-  });
+  const towerCount = buildings.tower;
+  if (towerCount <= 0) {
+    alert('You need a Guard Tower to train villagers');
+    return;
+  }
+
+  const maxTraining =
+    towerCount * (BUILDINGS.tower.trainingSlots ?? 0);
+
+  if (villagers.idle <= 0) {
+    alert('No idle villagers available');
+    return;
+  }
+
+  if (villagers.training >= maxTraining) {
+    alert('All training slots are full');
+    return;
+  }
+
+  // ✅ Move villager into training
+  villagers.idle--;
+  villagers.training++;
+
+  updateDisplay();
+
+  // ✅ Start training timer
+  const trainingTime = BUILDINGS.tower.trainingTimeMs ?? 5000;
+
+  const timeoutId = setTimeout(() => {
+    villagers.training--;
+    villagers.idle++; // later: guards++
+
+    updateDisplay();
+  }, trainingTime);
+
+  trainingQueue.push(timeoutId);
+});
 
   // Build buttons (cards)
   document.getElementById('build-house')?.addEventListener('click', () => startPlacement('house'));
