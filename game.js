@@ -65,18 +65,40 @@ let ghost = {
 };
 
 // Simple box collision check
+// ======================40 };
+  return { w: 50, h: 40 }; // default for future buildings
+}
+
 function withinBounds(x, y, type) {
-  const size = type === 'townCentre'
-    ? { w: 120, h: 40 }
-    : { w: 50, h: 40 };
+  const { w, h } = getFootprint(type);
 
   return (
-    x - size.w / 2 >= 0 &&
-    x + size.w / 2 <= canvas.width &&
-    y - size.h / 2 >= 0 &&
-    y + size.h / 2 <= canvas.height
+    x - w / 2 >= 0 &&
+    x + w / 2 <= canvas.width &&
+    y - h / 2 >= 0 &&
+    y + h / 2 <= canvas.height
   );
 }
+
+function collides(x, y, type) {
+  const a = getFootprint(type);
+
+  return placedBuildings.some(b => {
+    const c = getFootprint(b.type);
+
+    return (
+      x - a.w / 2 < b.x + c.w / 2 &&
+      x + a.w / 2 > b.x - c.w / 2 &&
+      y - a.h / 2 < b.y + c.h / 2 &&
+      y + a.h / 2 > b.y - c.h / 2
+    );
+  });
+}
+// Bounds + Collision Helpers
+// ======================
+
+function getFootprint(type) {
+  if (type === 'townCentre') return { w: 120, h: 40 };
 
 
 // ======================
