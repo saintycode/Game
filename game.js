@@ -38,16 +38,23 @@ function updateDisplay() {
   document.getElementById('villagers-training').textContent = `Training: ${villagers.training}`;
 }
 
-// ---------- Canvas ----------
+// ---------- Canvas Drawing buildings ----------
 function drawAllBuildings() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   placedBuildings.forEach(b => {
     if (b.type === 'townCentre') {
       ctx.fillStyle = '#8B8680';
       ctx.fillRect(b.x - 60, b.y - 20, 120, 40);
     }
+
+    if (b.type === 'house') {
+      ctx.fillStyle = '#A0522D';
+      ctx.fillRect(b.x - 25, b.y - 20, 50, 40);
+    }
   });
 }
+
 
 // ---------- Buttons ----------
 document.getElementById('send-villagers')?.addEventListener('click', () => {
@@ -63,15 +70,36 @@ document.getElementById('recall-villagers')?.addEventListener('click', () => {
   villagers.idle++;
   updateDisplay();
 });
-
+//------- Build building ------
 document.getElementById('build-house')?.addEventListener('click', () => {
-  if (resources.wood < 10 || resources.stone < 5) return alert('Not enough resources');
+  if (resources.wood < 10 || resources.stone < 5) {
+    alert('Not enough resources');
+    return;
+  }
+
   resources.wood -= 10;
   resources.stone -= 5;
+
   buildings.house++;
   villagers.idle += 2;
+
+  // ✅ Add house to the map (simple placement for now)
+  placedBuildings.push({
+    type: 'house',
+    x: 400 + (buildings.house * 40),
+    y: 460
+  });
+
+  // ✅ Update Built counter
+  const houseCountEl = document.getElementById('house-count');
+  if (houseCountEl) {
+    houseCountEl.textContent = `Built: ${buildings.house}`;
+  }
+
   updateDisplay();
+  drawAllBuildings();
 });
+
 
 // ---------- Resource Tick ----------
 setInterval(() => {
