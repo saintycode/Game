@@ -13,7 +13,8 @@ let buildings = {
 
 let villagers = { idle: 2, gathering: 0, working: 0, training: 0 };
 let workersAssigned = { farm: 0, logging: 0, market: 0 };
-
+  
+const GRID_SIZE = 20;
 const workerProduction = {
   farm: { food: 1 },
   logging: { wood: 1 },
@@ -28,7 +29,7 @@ const ctx = canvas.getContext('2d');
 let placedBuildings = [{ type: 'townCentre', x: 400, y: 400 }];
 
 
-// ---------- UI ----------
+// ---------- UI Helper functions ----------
   
 function updateDisplay() {
   document.getElementById('food').textContent = `🌾:${resources.food}`;
@@ -41,7 +42,9 @@ function updateDisplay() {
   document.getElementById('villagers-working').textContent = `Working: ${villagers.working}`;
   document.getElementById('villagers-training').textContent = `Training: ${villagers.training}`;
 }
-
+function snapToGrid(value) {
+  return Math.round(value / GRID_SIZE) * GRID_SIZE;
+}
 // ---------- Canvas Drawing buildings ----------
 // ======================
 // Placement + Collision
@@ -138,14 +141,15 @@ canvas.addEventListener('mousemove', (e) => {
   if (!placementMode.active) return;
 
   const rect = canvas.getBoundingClientRect();
-  ghost.x = e.clientX - rect.left;
-  ghost.y = e.clientY - rect.top;
+
+  // ✅ snap ghost to grid
+  ghost.x = snapToGrid(e.clientX - rect.left);
+  ghost.y = snapToGrid(e.clientY - rect.top);
 
   ghost.valid = !collides(ghost.x, ghost.y, placementMode.type);
 
   drawAllBuildings();
 });
-
 // ======================
 // Click canvas → place building
 // ======================
