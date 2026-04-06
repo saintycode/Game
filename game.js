@@ -1,181 +1,236 @@
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1) GAME STATE (numbers that change during play)
-  const resources = { wood: 10, stone: 10, food: 10, coin: 0 };
+  // 1) State
+  const resLoose = { wood: 10, stone: 10, food: 10, coin: 0, metal: 0 };   // usable now
+  const resStorable = { wood: 0, stone: 0, food: 0, coin: 0, metal: 0 };   // worker-made, not yet stored
+  const resStored = { wood: 0, stone: 0, food: 0, coin: 0, metal: 0 };     // warehouse protected
 
-const buildings = {const buildings 1,
-  house: 0,
-  farm: 0,
-  logging: 0,
-  market: 0,
-  mine: 0,
-  tower: 0
-};
-
+  const buildings = {
+    townCentre: 1,
+    house: 0,
+    farm: 0,
+    logging: 0,
+    market: 0,
+    mine: 0,
+    metalMine: 0,
+    warehouse: 0,
+    tower: 0,
+    barracks: 0,
+    archery: 0
+  };
 
   const villagers = {
-  idle: 2,
-  gathering: 0,
-  working: 0,
-  training: 0,
-  guards: 0
-};
- 
-  // How many workers are assigned to each workplace type
-const workersAssigned = {
-: 0,  farm: 0,
-  market: 0,
-  mine: 0 
-};
+    idle: 2,
+    gathering: 0,
+    working: 0,
+    training: 0,
+    guards: 0,
+    soldiers: 0,
+    archers: 0
+  };
 
-  
-  // How many training/guards are assigned
-  const trainingQueue = [];
-  const guardsAssigned = 0;
-  
-  // 2) CANVAS + GRID
+  const workersAssigned = {
+    farm: 0,
+    logging: 0,
+    market: 0,
+    mine: 0,
+    metalMine: 0
+  };
+
+  // 2) Canvas + grid
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
+  const GRID = 20;
+  const snap = (v) => Math.round(v / GRID) * GRID;
 
-  const GRID_SIZE = 20; // change to 16/32 later if you want a different feel
-
-  const snapToGrid = (v) => Math.round(v / GRID_SIZE) * GRID_SIZE;
-
-
-  // 3) BUILDING DEFINITIONS (edit here to add new buildings)
+  // 3) Building config (add/edit here)
   const BUILDINGS = {
     townCentre: {
       label: 'Town Centre',
-      cost: { wood: 0, stone: 0, food: 0, coin: 0 },
-      size: { w: 120, h: 80 }, // bigger so the sprite reads well
+      cost: { wood: 0, stone: 0, food: 0, coin: 0, metal: 0 },
+      size: { w: 120, h: 80 },
       sprite: 'images/town-centre.png',
       workerSlots: 0,
       productionPerWorker: {},
+      requires: [],
       onBuild: () => {}
     },
 
     house: {
       label: 'House',
-      cost: { wood: 10, stone: 5, food: 0, coin: 0 },
+      cost: { wood: 10, stone: 5, food: 0, coin: 0, metal: 0 },
       size: { w: 70, h: 70 },
       sprite: 'images/house.png',
       workerSlots: 0,
       productionPerWorker: {},
-      onBuild: () => {
-        // House bonus: +2 idle villagers
-        villagers.idle += 2;
-      }
+      requires: [],
+      onBuild: () => { villagers.idle += 2; }
     },
 
     farm: {
       label: 'Farm',
-      cost: { wood: 15, stone: 7, food: 0, coin: 0 },
+      cost: { wood: 15, stone: 7, food: 0, coin: 0, metal: 0 },
       size: { w: 90, h: 70 },
       sprite: 'images/farm.png',
       workerSlots: 2,
       productionPerWorker: { food: 1 },
+      requires: [],
       onBuild: () => {}
     },
 
     logging: {
       label: 'Logging',
-      cost: { wood: 20, stone: 10, food: 0, coin: 0 },
+      cost: { wood: 20, stone: 10, food: 0, coin: 0, metal: 0 },
       size: { w: 90, h: 70 },
       sprite: 'images/logging.png',
       workerSlots: 2,
       productionPerWorker: { wood: 1 },
+      requires: [],
       onBuild: () => {}
     },
-   mine: {
-    label: 'Mine',
-    cost: { wood: 20, stone: 12, food: 0, coin: 5 },
-    size: { w: 90, h: 70 },
-    sprite: 'images/mine.png',
-    workerSlots: 2,
-    productionPerWorker: { stone: 1 },
-    onBuild: () => {}
-    },
+
     market: {
       label: 'Market',
-      cost: { wood: 25, stone: 15, food: 0, coin: 0 },
+      cost: { wood: 25, stone: 15, food: 0, coin: 0, metal: 0 },
       size: { w: 90, h: 70 },
       sprite: 'images/market.png',
       workerSlots: 2,
       productionPerWorker: { coin: 1 },
+      requires: [],
+      unique: true,
       onBuild: () => {}
     },
 
-    tower: { label: 'Guard Tower',
-    cost: { wood: 30, stone: 20, food: 0, coin: 10 },
-    size: { w: 70, h: 90 },
-    sprite: 'images/guard-tower.png',
+    // Mine (stone) – gated behind market + 5 coin
+    mine: {
+      label: 'Mine',
+      cost: { wood: 20, stone: 12, food: 0, coin: 5, metal: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/mine.png',
+      workerSlots: 2,
+      productionPerWorker: { stone: 1 },
+      requires: [{ type: 'market', min: 1 }],
+      onBuild: () => {}
+    },
 
-    trainingSlots: 2,     // training at a time
-    guardSlots: 2,        // ✅ NEW: guard duty slots per tower
-    trainingTimeMs: 5000,
+    // Metal Mine – also gated behind market (no gathering metal)
+    metalMine: {
+      label: 'Metal Mine',
+      cost: { wood: 30, stone: 20, food: 0, coin: 10, metal: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/metal-mine.png', // add later (placeholder draws)
+      workerSlots: 2,
+      productionPerWorker: { metal: 1 },
+      requires: [{ type: 'market', min: 1 }],
+      onBuild: () => {}
+    },
 
-    onBuild: () => {}
+    // Warehouse – stores ONLY worker-produced storable resources
+    warehouse: {
+      label: 'Warehouse',
+      cost: { wood: 40, stone: 20, food: 0, coin: 0, metal: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/warehouse.png', // add later (placeholder draws)
+      workerSlots: 0,
+      productionPerWorker: {},
+      requires: [],
+      capacity: { wood: 1000, stone: 1000, food: 1000, metal: 1000, coin: 100 },
+      onBuild: () => {}
+    },
+
+    // Guard Tower – training + guards
+    tower: {
+      label: 'Guard Tower',
+      cost: { wood: 30, stone: 20, food: 0, coin: 10, metal: 0 },
+      size: { w: 70, h: 90 },
+      sprite: 'images/guard-tower.png',
+      workerSlots: 0,
+      productionPerWorker: {},
+      requires: [],
+      trainingSlots: 2,
+      guardSlots: 2,
+      trainingTimeMs: 5000,
+      onBuild: () => {}
+    },
+
+    // Archery Range – cheaper military training
+    archery: {
+      label: 'Archery Range',
+      cost: { wood: 100, stone: 200, food: 0, coin: 50, metal: 0 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/archery.png', // add later
+      workerSlots: 0,
+      productionPerWorker: {},
+      requires: [{ type: 'market', min: 1 }],
+      trainingSlots: 2,
+      trainingTimeMs: 7000,
+      onBuild: () => {}
+    },
+
+    // Barracks – heavy military training (needs metal)
+    barracks: {
+      label: 'Barracks',
+      cost: { wood: 100, stone: 300, food: 0, coin: 150, metal: 300 },
+      size: { w: 90, h: 70 },
+      sprite: 'images/barracks.png', // add later
+      workerSlots: 0,
+      productionPerWorker: {},
+      requires: [{ type: 'metalMine', min: 1 }, { type: 'market', min: 1 }],
+      trainingSlots: 2,
+      trainingTimeMs: 9000,
+      onBuild: () => {}
     }
   };
 
-  // Which DOM element holds "Built: X" for each building type
-  const COUNT_ID = {const COUNT: 'house-count',
-  farm: 'farm-count',
-  logging: 'logging-count',
-  market: 'market-count',
-  mine: 'mine-count',     
-  tower: 'tower-count'
-};
+  // 4) DOM id maps (optional, safe)
+  const COUNT_ID = {
+    house: 'house-count',
+    farm: 'farm-count',
+    logging: 'logging-count',
+    market: 'market-count',
+    mine: 'mine-count',
+    metalMine: 'metal-mine-count',
+    warehouse: 'warehouse-count',
+    tower: 'tower-count',
+    archery: 'archery-count',
+    barracks: 'barracks-count'
+  };
 
-
-  // Worker UI elements in your cards
   const WORKER_UI = {
-  farm logging: 'logging-workers',  
-  farm: 'farm-workers',
-  market: 'market-workers',
-  mine: 'mine-workers'    
-};
+    farm: 'farm-workers',
+    logging: 'logging-workers',
+    market: 'market-workers',
+    mine: 'mine-workers',
+    metalMine: 'metal-mine-workers'
+  };
 
-
-  // 4) SPRITE LOADING (images)
+  // 5) Sprites
   const sprites = {};
-
-  function loadSprites() {
+  const loadSprites = () => {
     Object.keys(BUILDINGS).forEach((type) => {
       const img = new Image();
-      img.onload = () => drawAll(); // redraw as soon as each sprite arrives
+      img.onload = () => drawAll();
       img.src = BUILDINGS[type].sprite;
       sprites[type] = img;
     });
-  }
+  };
 
-  // 5) WORLD STATE (what is placed on the canvas)
-  const placedBuildings = [
-    { type: 'townCentre', x: 400, y: 400 } // starting building
-  ];
-
-  // 6) PLACEMENT MODE + GHOST
-  const placementMode = { active: false, type: null };
-
+  // 6) World + placement
+  const placed = [{ type: 'townCentre', x: 400, y: 400 }];
+  const placeMode = { active: false, type: null };
   const ghost = { x: 0, y: 0, visible: false, valid: false };
 
-  function getFootprint(type) {
-    return BUILDINGS[type].size;
-  }
+  const footprint = (type) => BUILDINGS[type].size;
 
-  function withinBounds(x, y, type) {
-    const { w, h } = getFootprint(type);
-    return (
-      x - w / 2 >= 0 &&
-      x + w / 2 <= canvas.width &&
-      y - h / 2 >= 0 &&
-      y + h / 2 <= canvas.height
-    );
-  }
+  const inBounds = (x, y, type) => {
+    const { w, h } = footprint(type);
+    return x - w / 2 >= 0 && x + w / 2 <= canvas.width && y - h / 2 >= 0 && y + h / 2 <= canvas.height;
+  };
 
-  function collides(x, y, type) {
-    const a = getFootprint(type);
-    return placedBuildings.some((b) => {
-      const c = getFootprint(b.type);
+  const collides = (x, y, type) => {
+    const a = footprint(type);
+    return placed.some((b) => {
+      const c = footprint(b.type);
       return (
         x - a.w / 2 < b.x + c.w / 2 &&
         x + a.w / 2 > b.x - c.w / 2 &&
@@ -183,385 +238,328 @@ const workersAssigned = {
         y + a.h / 2 > b.y - c.h / 2
       );
     });
-  }
+  };
 
-  function canPlace(x, y, type) {
-    return withinBounds(x, y, type) && !collides(x, y, type);
-  }
+  const canPlace = (x, y, type) => inBounds(x, y, type) && !collides(x, y, type);
 
-  // 7) UI UPDATE FUNCTIONS
-  function updateResourceUI() {
-    const foodEl = document.getElementById('food');
-    const woodEl = document.getElementById('wood');
-    const stoneEl = document.getElementById('stone');
-    const coinEl = document.getElementById('coin');
+  // 7) UI (safe updates)
+  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
 
-    if (foodEl) foodEl.textContent = `🌾:${Math.floor(resources.food)}`;
-    if (woodEl) woodEl.textContent = `🪵:${Math.floor(resources.wood)}`;
-    if (stoneEl) stoneEl.textContent = `⛏️:${Math.floor(resources.stone)}`;
-    if (coinEl) coinEl.textContent = `🪙:${Math.floor(resources.coin)}`;
-  }
+  const updateResourcesUI = () => {
+    setText('food', `🌾:${Math.floor(resLoose.food)}`);
+    setText('wood', `🪵:${Math.floor(resLoose.wood)}`);
+    setText('stone', `⛏️:${Math.floor(resLoose.stone)}`);
+    setText('coin', `🪙:${Math.floor(resLoose.coin)}`);
+    // Optional (only if you add these spans later):
+    setText('metal', `🔩:${Math.floor(resLoose.metal)}`);
+    setText('stored-wood', `Stored 🪵:${Math.floor(resStored.wood)}`);
+    setText('stored-stone', `Stored ⛏️:${Math.floor(resStored.stone)}`);
+    setText('stored-food', `Stored 🌾:${Math.floor(resStored.food)}`);
+    setText('stored-coin', `Stored 🪙:${Math.floor(resStored.coin)}`);
+    setText('stored-metal', `Stored 🔩:${Math.floor(resStored.metal)}`);
+    setText('storable-wood', `Storable 🪵:${Math.floor(resStorable.wood)}`);
+    setText('storable-stone', `Storable ⛏️:${Math.floor(resStorable.stone)}`);
+    setText('storable-food', `Storable 🌾:${Math.floor(resStorable.food)}`);
+    setText('storable-coin', `Storable 🪙:${Math.floor(resStorable.coin)}`);
+    setText('storable-metal', `Storable 🔩:${Math.floor(resStorable.metal)}`);
+  };
 
-  function updateVillagerUI() {
-    const idleEl = document.getElementById('villagers-idle');
-    const gatheringEl = document.getElementById('villagers-gathering');
-    const workingEl = document.getElementById('villagers-working');
-    const trainingEl = document.getElementById('villagers-training');
+  const updateVillagersUI = () => {
+    setText('villagers-idle', `Idle: ${villagers.idle}`);
+    setText('villagers-gathering', `Gathering: ${villagers.gathering}`);
+    setText('villagers-working', `Working: ${villagers.working}`);
+    setText('villagers-training', `Training: ${villagers.training}`);
+    setText('villagers-guards', `Guards: ${villagers.guards}`);
+    setText('villagers-soldiers', `Soldiers: ${villagers.soldiers}`);
+    setText('villagers-archers', `Archers: ${villagers.archers}`);
+  };
 
-    if (idleEl) idleEl.textContent = `Idle: ${villagers.idle}`;
-    if (gatheringEl) gatheringEl.textContent = `Gathering: ${villagers.gathering}`;
-    if (workingEl) workingEl.textContent = `Working: ${villagers.working}`;
-    if (trainingEl) trainingEl.textContent = `Training: ${villagers.training}`;
-  }
-
-  function updateWorkerUI() {
+  const updateWorkersUI = () => {
     Object.keys(WORKER_UI).forEach((type) => {
-      const el = document.getElementById(WORKER_UI[type]);
-      if (!el) return;
-
-      const max = buildings[type] * BUILDINGS[type].workerSlots;
-      const cur = workersAssigned[type];
-      el.textContent = `${cur} / ${max}`;
+      const max = buildings[type] * (BUILDINGS[type].workerSlots ?? 0);
+      setText(WORKER_UI[type], `${workersAssigned[type]} / ${max}`);
     });
-  }
+  };
 
-  function updateWorkerButtons() {
-    ['farm', 'logging', 'market'].forEach((type) => {
-      const addBtn = document.getElementById(`${type}-add-worker`);
-      const removeBtn = document.getElementById(`${type}-remove-worker`);
+  const updateTowerGuardsUI = () => {
+    const max = buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
+    setText('tower-workers', `${villagers.guards} / ${max}`);
+  };
 
-      const max = buildings[type] * BUILDINGS[type].workerSlots;
-      const cur = workersAssigned[type];
+  const updateAllUI = () => {
+    updateResourcesUI();
+    updateVillagersUI();
+    updateWorkersUI();
+    updateTowerGuardsUI();
+  };
 
-      if (addBtn) addBtn.disabled = villagers.idle === 0 || cur >= max;
-      if (removeBtn) removeBtn.disabled = cur === 0;
-    });
-  }
-function updateGuardUI() {
-  const guardEl = document.getElementById('tower-workers');
-  if (!guardEl) return;
-
-  const maxGuards =
-    buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
-
-  guardEl.textContent = `${villagers.guards} / ${maxGuards}`;
-}
-  
-function updateDisplay() {
-  updateResourceUI();
-  updateVillagerUI();
-  updateWorkerUI();
-  updateWorkerButtons();
-  updateGuardUI(); // ✅ new
-}
-  // 8) DRAWING (sprites + ghost)
-  function drawBuildingSprite(type, x, y) {
+  // 8) Drawing
+  const drawSprite = (type, x, y) => {
     const img = sprites[type];
-    const { w, h } = getFootprint(type);
-
-    // If sprite hasn't loaded yet, draw a placeholder box so you still see something.
+    const { w, h } = footprint(type);
     if (!img || !img.complete) {
-      ctx.fillStyle = '#999';
+      ctx.fillStyle = '#666';
       ctx.fillRect(x - w / 2, y - h / 2, w, h);
       return;
     }
-
     ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
-  }
+  };
 
-  function drawAll() {
+  const drawAll = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    placed.forEach((b) => drawSprite(b.type, b.x, b.y));
 
-    // Draw placed buildings
-    placedBuildings.forEach((b) => drawBuildingSprite(b.type, b.x, b.y));
-
-    // Draw ghost preview (green overlay if valid, red overlay if invalid)
-    if (placementMode.active && ghost.visible) {
-      drawBuildingSprite(placementMode.type, ghost.x, ghost.y);
-
+    if (placeMode.active && ghost.visible) {
+      drawSprite(placeMode.type, ghost.x, ghost.y);
       ctx.save();
       ctx.globalAlpha = 0.35;
       ctx.fillStyle = ghost.valid ? '#3CB371' : '#FF3333';
-      const { w, h } = getFootprint(placementMode.type);
+      const { w, h } = footprint(placeMode.type);
       ctx.fillRect(ghost.x - w / 2, ghost.y - h / 2, w, h);
       ctx.restore();
     }
-  }
+  };
 
-  // 9) BUILD FLOW (enter placement mode from a card)
-  function hasResources(cost) {
-    return Object.keys(cost).every((r) => (resources[r] ?? 0) >= cost[r]);
-  }
+  // 9) Build rules
+  const hasCost = (cost) => Object.keys(cost).every((k) => (resLoose[k] ?? 0) >= cost[k]);
+  const payCost = (cost) => Object.keys(cost).forEach((k) => { resLoose[k] -= cost[k]; });
 
-  function payCost(cost) {
-    Object.keys(cost).forEach((r) => {
-      resources[r] -= cost[r];
-    });
-  }
+  const meetsRequires = (type) => {
+    const reqs = BUILDINGS[type].requires ?? [];
+    return reqs.every((r) => (buildings[r.type] ?? 0) >= (r.min ?? 1));
+  };
 
-  function startPlacement(type) {
+  const startPlacement = (type) => {
     const def = BUILDINGS[type];
 
-    // Example rule: only one market allowed (easy to remove if you want)
-    if (type === 'market' && buildings.market > 0) {
-      alert('Only one market allowed');
+    if (def.unique && buildings[type] > 0) {
+      alert(`Only one ${def.label} allowed`);
       return;
     }
-    if (type === 'mine' && (buildings.market <= 0 || resources.coin < 5)) {
-    alert('You need a Market and 5 coin to build a Mine');
-    return;
+
+    if (!meetsRequires(type)) {
+      alert(`Missing dependency for ${def.label}`);
+      return;
     }
-    if (!hasResources(def.cost)) {
+
+    if (!hasCost(def.cost)) {
       alert('Not enough resources');
       return;
     }
 
-    placementMode.active = true;
-    placementMode.type = type;
+    placeMode.active = true;
+    placeMode.type = type;
     ghost.visible = true;
 
-    ghost.x = snapToGrid(canvas.width / 2);
-    ghost.y = snapToGrid(canvas.height / 2);
+    ghost.x = snap(canvas.width / 2);
+    ghost.y = snap(canvas.height / 2);
     ghost.valid = canPlace(ghost.x, ghost.y, type);
 
     drawAll();
-  }
+  };
 
-  // 10) INPUT: mousemove / click / escape
+  // 10) Input (placement)
   canvas.addEventListener('mousemove', (e) => {
-    if (!placementMode.active) return;
-
-    const rect = canvas.getBoundingClientRect();
-    ghost.x = snapToGrid(e.clientX - rect.left);
-    ghost.y = snapToGrid(e.clientY - rect.top);
-
-    ghost.valid = canPlace(ghost.x, ghost.y, placementMode.type);
-    drawAll();
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    if (!placementMode.active) return;
-    ghost.visible = false;
-    drawAll();
-  });
-
-  canvas.addEventListener('mouseenter', () => {
-    if (!placementMode.active) return;
-    ghost.visible = true;
+    if (!placeMode.active) return;
+    const r = canvas.getBoundingClientRect();
+    ghost.x = snap(e.clientX - r.left);
+    ghost.y = snap(e.clientY - r.top);
+    ghost.valid = canPlace(ghost.x, ghost.y, placeMode.type);
     drawAll();
   });
 
   canvas.addEventListener('click', () => {
-    if (!placementMode.active || !ghost.valid) return;
+    if (!placeMode.active || !ghost.valid) return;
 
-    const type = placementMode.type;
+    const type = placeMode.type;
     const def = BUILDINGS[type];
 
     payCost(def.cost);
-
-    placedBuildings.push({ type, x: ghost.x, y: ghost.y });
+    placed.push({ type, x: ghost.x, y: ghost.y });
     buildings[type]++;
 
-    // run special build effects (e.g. house adds villagers)
     def.onBuild?.();
 
-    // update built counter in the card (if it has one)
-    const countId = COUNT_ID[type];
-    if (countId) {
-      const el = document.getElementById(countId);
-      if (el) el.textContent = `Built: ${buildings[type]}`;
-    }
+    const id = COUNT_ID[type];
+    if (id) setText(id, `Built: ${buildings[type]}`);
 
-    placementMode.active = false;
-    placementMode.type = null;
+    placeMode.active = false;
+    placeMode.type = null;
     ghost.visible = false;
 
-    updateDisplay();
+    updateAllUI();
     drawAll();
   });
 
   window.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (!placementMode.active) return;
-
-    placementMode.active = false;
-    placementMode.type = null;
+    if (!placeMode.active) return;
+    placeMode.active = false;
+    placeMode.type = null;
     ghost.visible = false;
-
     drawAll();
   });
 
-
-  // 11) BUTTONS (villagers + build cards + workers)
-  // Villagers: gathering
-  document.getElementById('send-villagers')?.addEventListener('click', () => {
-    if (villagers.idle <= 0) return alert('No idle villagers available!');
-    villagers.idle--;
-    villagers.gathering++;
-    updateDisplay();
-  });
-
-  document.getElementById('recall-villagers')?.addEventListener('click', () => {
-    if (villagers.gathering <= 0) return;
-    villagers.gathering--;
-    villagers.idle++;
-    updateDisplay();
-  });
-  // Villagers: traning for guard 
-// Guards UI (villager row)
-function updateGuardsUI() {
-  const guardsEl = document.getElementById('villagers-guards');
-  if (guardsEl) guardsEl.textContent = `Guards: ${villagers.guards}`;
-}
-
-// Guard Tower UI (card row)
-function updateGuardUI() {
-  const guardEl = document.getElementById('tower-workers');
-  if (!guardEl) return;
-
-  const maxGuards = buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
-  guardEl.textContent = `${villagers.guards} / ${maxGuards}`;
-}
-
-// Training (time-based)
-document.getElementById('send-villagers-training')?.addEventListener('click', () => {
-  const towerCount = buildings.tower;
-
-  if (towerCount <= 0) {
-    alert('You need a Guard Tower to train villagers');
-    return;
-  }
-
-  const maxTraining = towerCount * (BUILDINGS.tower.trainingSlots ?? 0);
-
-  if (villagers.idle <= 0) {
-    alert('No idle villagers available');
-    return;
-  }
-
-  if (villagers.training >= maxTraining) {
-    alert('All training slots are full');
-    return;
-  }
-
-  villagers.idle--;
-  villagers.training++;
-  updateDisplay();
-
-  const trainingTime = BUILDINGS.tower.trainingTimeMs ?? 5000;
-
-  const timeoutId = setTimeout(() => {
-    villagers.training--;
-    villagers.idle++; // v1: trained villagers return to idle
-    updateDisplay();
-  }, trainingTime);
-
-  trainingQueue.push(timeoutId);
-});
-
-
-// Guard Duty Assignment (+ / -)
-function assignGuard() {
-  const maxGuards = buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
-
-  if (villagers.idle <= 0) {
-    alert('No available villagers to assign');
-    return;
-  }
-
-  if (villagers.guards >= maxGuards) {
-    alert('All guard slots are full');
-    return;
-  }
-
-  villagers.idle--;
-  villagers.guards++;
-  updateDisplay();
-}
-
-function removeGuard() {
-  if (villagers.guards <= 0) return;
-
-  villagers.guards--;
-  villagers.idle++;
-  updateDisplay();
-}
-
-//  Attach guard buttons 
-document.getElementById('tower-add-worker')?.addEventListener('click', assignGuard);
-document.getElementById('tower-remove-worker')?.addEventListener('click', removeGuard);
-
-  // Build buttons (cards)
-  document.getElementById('build-house')?.addEventListener('click', () => startPlacement('house'));
-  document.getElementById('build-farm')?.addEventListener('click', () => startPlacement('farm'));
-  document.getElementById('build-logging')?.addEventListener('click', () => startPlacement('logging'));
-  document.getElementById('build-market')?.addEventListener('click', () => startPlacement('market'));
-  document.getElementById('build-tower')?.addEventListener('click', () => startPlacement('tower'));
-  document.getElementById('build-mine')?.addEventListener('click', () => startPlacement('mine'));
-
-  // Worker + / -
-  function assignWorkerTo(type) {
-    const max = buildings[type] * BUILDINGS[type].workerSlots;
+  // 11) Workers (+/- generic)
+  const assignWorkerTo = (type) => {
+    const max = buildings[type] * (BUILDINGS[type].workerSlots ?? 0);
     if (villagers.idle <= 0) return alert('No idle villagers available');
     if (workersAssigned[type] >= max) return alert('No free work slots');
 
     villagers.idle--;
     villagers.working++;
     workersAssigned[type]++;
-    updateDisplay();
-  }
+    updateAllUI();
+  };
 
-  function removeWorkerFrom(type) {
+  const removeWorkerFrom = (type) => {
     if (workersAssigned[type] <= 0) return;
     workersAssigned[type]--;
     villagers.working--;
     villagers.idle++;
-    updateDisplay();
-  }
+    updateAllUI();
+  };
 
-  document.getElementById('farm-add-worker')?.addEventListener('click', () => assignWorkerTo('farm'));
-  document.getElementById('farm-remove-worker')?.addEventListener('click', () => removeWorkerFrom('farm'));
-  document.getElementById('logging-add-worker')?.addEventListener('click', () => assignWorkerTo('logging'));
-  document.getElementById('logging-remove-worker')?.addEventListener('click', () => removeWorkerFrom('logging'));
-  document.getElementById('market-add-worker')?.addEventListener('click', () => assignWorkerTo('market'));
-  document.getElementById('market-remove-worker')?.addEventListener('click', () => removeWorkerFrom('market'));
-  document.getElementById('mine-add-worker')?.addEventListener('click', () => assignWorkerTo('mine'));
-  document.getElementById('mine-remove-worker')?.addEventListener('click', () => removeWorkerFrom('mine'));
-  
-function updateDisplay() {
-  updateResourceUI();
-  updateVillagerUI();
-  updateWorkerUI();
-  updateWorkerButtons();
-  updateGuardsUI(); 
-  updateGuardUI();   
-}
+  // 12) Guards (+/-)
+  const assignGuard = () => {
+    const max = buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
+    if (villagers.idle <= 0) return alert('No available villagers to assign');
+    if (villagers.guards >= max) return alert('All guard slots are full');
 
-  // 12) RESOURCE TICK (simple + predictable)
+    villagers.idle--;
+    villagers.guards++;
+    updateAllUI();
+  };
 
+  const removeGuard = () => {
+    if (villagers.guards <= 0) return;
+    villagers.guards--;
+    villagers.idle++;
+    updateAllUI();
+  };
+
+  // 13) Training (tower / barracks / archery)
+  const trainingQueue = [];
+
+  const startTraining = (buildingType, unitType) => {
+    const count = buildings[buildingType] ?? 0;
+    if (count <= 0) return alert(`You need a ${BUILDINGS[buildingType].label}`);
+
+    const slots = (BUILDINGS[buildingType].trainingSlots ?? 0) * count;
+    if (villagers.idle <= 0) return alert('No idle villagers available');
+    if (villagers.training >= slots) return alert('All training slots are full');
+
+    villagers.idle--;
+    villagers.training++;
+    updateAllUI();
+
+    const ms = BUILDINGS[buildingType].trainingTimeMs ?? 5000;
+    const t = setTimeout(() => {
+      villagers.training--;
+      // promote
+      if (unitType === 'soldier') villagers.soldiers++;
+      else if (unitType === 'archer') villagers.archers++;
+      else villagers.idle++; // fallback
+      updateAllUI();
+    }, ms);
+
+    trainingQueue.push(t);
+  };
+
+  // 14) Warehouse storage logic
+  const applyWarehouseStorage = () => {
+    const wCount = buildings.warehouse ?? 0;
+    if (wCount <= 0) return;
+
+    const cap = BUILDINGS.warehouse.capacity;
+    const max = {
+      wood: cap.wood * wCount,
+      stone: cap.stone * wCount,
+      food: cap.food * wCount,
+      metal: cap.metal * wCount,
+      coin: cap.coin * wCount
+    };
+
+    // move storable -> stored (only worker-made can move)
+    Object.keys(resStorable).forEach((k) => {
+      const room = Math.max(0, (max[k] ?? 0) - (resStored[k] ?? 0));
+      if (room <= 0) return;
+      const moved = Math.min(room, resStorable[k]);
+      resStorable[k] -= moved;
+      resStored[k] += moved;
+    });
+  };
+
+  // 15) Tick (gathering + worker production)
   setInterval(() => {
-    // Gathering
-    resources.wood += villagers.gathering * 1;
-    resources.stone += villagers.gathering * 1;
-    resources.food += villagers.gathering * 1;
+    // 15.1 Gathering -> Loose only
+    resLoose.wood += villagers.gathering * 1;
+    resLoose.stone += villagers.gathering * 1;
+    resLoose.food += villagers.gathering * 1;
+    // NOTE: no gathering metal, by design
 
-    // Working (per building type)
+    // 15.2 Workers -> Storable only
     Object.keys(workersAssigned).forEach((type) => {
       const count = workersAssigned[type];
       if (count <= 0) return;
-
-      const prod = BUILDINGS[type].productionPerWorker;
-      Object.keys(prod).forEach((res) => {
-        resources[res] += prod[res] * count;
+      const prod = BUILDINGS[type].productionPerWorker ?? {};
+      Object.keys(prod).forEach((r) => {
+        resStorable[r] += prod[r] * count;
       });
     });
 
-    updateDisplay();
+    // 15.3 Warehouse converts Storable -> Stored up to capacity
+    applyWarehouseStorage();
+
+    updateAllUI();
   }, 3000);
 
-  // 13) INIT
+  // 16) Wire existing buttons (safe if missing)
+  // 16.1 Villagers gather
+  document.getElementById('send-villagers')?.addEventListener('click', () => {
+    if (villagers.idle <= 0) return alert('No idle villagers available!');
+    villagers.idle--;
+    villagers.gathering++;
+    updateAllUI();
+  });
+
+  document.getElementById('recall-villagers')?.addEventListener('click', () => {
+    if (villagers.gathering <= 0) return;
+    villagers.gathering--;
+    villagers.idle++;
+    updateAllUI();
+  });
+
+  // 16.2 Build buttons (add HTML ids for new ones)
+  document.getElementById('build-house')?.addEventListener('click', () => startPlacement('house'));
+  document.getElementById('build-farm')?.addEventListener('click', () => startPlacement('farm'));
+  document.getElementById('build-logging')?.addEventListener('click', () => startPlacement('logging'));
+  document.getElementById('build-market')?.addEventListener('click', () => startPlacement('market'));
+  document.getElementById('build-mine')?.addEventListener('click', () => startPlacement('mine'));
+  document.getElementById('build-metal-mine')?.addEventListener('click', () => startPlacement('metalMine'));
+  document.getElementById('build-warehouse')?.addEventListener('click', () => startPlacement('warehouse'));
+  document.getElementById('build-tower')?.addEventListener('click', () => startPlacement('tower'));
+  document.getElementById('build-archery')?.addEventListener('click', () => startPlacement('archery'));
+  document.getElementById('build-barracks')?.addEventListener('click', () => startPlacement('barracks'));
+
+  // 16.3 Worker buttons (farm/logging/market/mine/metalMine)
+  ['farm', 'logging', 'market', 'mine', 'metalMine'].forEach((t) => {
+    document.getElementById(`${t}-add-worker`)?.addEventListener('click', () => assignWorkerTo(t));
+    document.getElementById(`${t}-remove-worker`)?.addEventListener('click', () => removeWorkerFrom(t));
+  });
+
+  // 16.4 Guard tower duty
+  document.getElementById('tower-add-worker')?.addEventListener('click', assignGuard);
+  document.getElementById('tower-remove-worker')?.addEventListener('click', removeGuard);
+
+  // 16.5 Training buttons
+  // (Tower trains “guards later”; barracks trains soldiers; archery trains archers)
+  document.getElementById('send-villagers-training')?.addEventListener('click', () => startTraining('tower', 'idle'));
+  document.getElementById('train-soldier')?.addEventListener('click', () => startTraining('barracks', 'soldier'));
+  document.getElementById('train-archer')?.addEventListener('click', () => startTraining('archery', 'archer'));
+
+  // 17) Init
   loadSprites();
-  updateDisplay();
+  updateAllUI();
   drawAll();
 });
-``
