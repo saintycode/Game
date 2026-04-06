@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6) Buildings config
   const BUILDINGS = {
+    townCentre: { w: 120, h: 80 },sprite: 'images/town-centre.png'},cost: {},
     house: { cost:{wood:10,stone:5}, size:{w:70,h:70}, sprite:'images/house.png', onBuild:()=>villagers.idle+=2 },
     farm: { cost:{wood:15,stone:7}, size:{w:90,h:70}, sprite:'images/farm.png', workers:2, prod:{food:1} },
     logging:{ cost:{wood:20,stone:10}, size:{w:90,h:70}, sprite:'images/logging.png', workers:2, prod:{wood:1} },
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const reqOk = t => (BUILDINGS[t].req||[]).every(r => buildings[r]>0);
 
   // 9) Collision
-  const box = t => BUILDINGS[t].size;
+  const box = t => BUILDINGS[t]?.size || { w: 60, h: 60 };
   const inside = (x,y,t) => {
     const {w,h}=box(t);
     return x-w/2>=0 && y-h/2>=0 && x+w/2<=canvas.width && y+h/2<=canvas.height;
