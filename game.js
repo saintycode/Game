@@ -111,27 +111,46 @@ const BUILDINGS = {
     place.active=true; place.type=t;
   };
 
-  // 12) Place building
-  canvas.addEventListener('mousemove',e=>{
-    if(!place.active) return;
-    const r=canvas.getBoundingClientRect();
-    ghost.x=snap(e.clientX-r.left);
-    ghost.y=snap(e.clientY-r.top);
-    ghost.ok=inside(ghost.x,ghost.y,place.type)&&!hit(ghost.x,ghost.y,place.type);
-    draw();
-  });
+// 12) Place building
+canvas.addEventListener('mousemove', e => {
+  if (!place.active) return;
 
-  canvas.addEventListener('click',()=>{
-    if(!place.active||!ghost.ok) return;
-    const t=place.type;
-    pay(BUILDINGS[t].cost);
-    placed.push({type:t,x:ghost.x,y:ghost.y});
-    buildings[t]++;
-    if(BUILDINGS[t].onBuild) BUILDINGS[t].onBuild();
-    place.active=false;
-    updateUI();
-    draw();
-  });
+  const r = canvas.getBoundingClientRect();
+  ghost.x = snap(e.clientX - r.left);
+  ghost.y = snap(e.clientY - r.top);
+
+  ghost.ok =
+    inside(ghost.x, ghost.y, place.type) &&
+    !hit(ghost.x, ghost.y, place.type);
+
+  draw();
+});
+
+canvas.addEventListener('click', () => {
+  if (!place.active || !ghost.ok) return;
+
+  const t = place.type;
+
+  // pay + place
+  pay(BUILDINGS[t].cost);
+  placed.push({ type: t, x: ghost.x, y: ghost.y });
+  buildings[t]++;
+
+  // update count UI
+  const el = document.getElementById(`${t}-count`);
+  if (el) el.textContent = `Built: ${buildings[t]}`;
+
+  // run build effect
+  BUILDINGS[t].onBuild?.();
+
+  // reset placement
+  place.active = false;
+  place.type = null;
+  ghost.ok = false;
+
+  updateUI();
+  draw();
+});
 
   // 13) Workers
   const addWorker = t => {
@@ -214,6 +233,16 @@ const BUILDINGS = {
   document.getElementById('train-archer')?.addEventListener('click',()=>train('archery','archers'));
   document.getElementById('train-soldier')?.addEventListener('click',()=>train('barracks','soldiers'));
   document.getElementById('send-villagers-training')?.addEventListener('click',()=>train('tower','guards'));
+// Tabs
+document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));document.querySelectorAll('.tab').forEach(tab => {
+
+    tab.classList.add('active');
+    const id = tab.dataset.tab;
+    document.getElementById(id)?.classList.add('active');
+  });
+});
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 
   // 19) Init
   updateUI(); draw();
