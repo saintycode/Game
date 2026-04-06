@@ -1,16 +1,11 @@
-/* ======================
-   Page Layout
-====================== */
+/* 1) Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-.page {
-  max-width: 900px;
-  margin: 0 auto;
-}
 
+/* 2) Page */
 body {
   font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -19,232 +14,214 @@ body {
   padding: 20px;
 }
 
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 3) Headings */
 h1 {
   color: #fff;
   text-align: center;
-  margin-bottom: 20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 16px;
 }
 
 h2 {
   color: #fff;
-  margin: 14px 0 10px;
   text-align: center;
+  margin: 12px 0;
 }
 
-/* ======================
-   Resources & Villagers Panel
-====================== */
+/* 4) Resources */
 #resources {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 10px;
-  padding: 18px;
+  padding: 16px;
   max-width: 520px;
   margin: 0 auto 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   text-align: center;
 }
 
 .resource-group,
 .villager-group {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
-/* ======================
-   Action Buttons
-====================== */
+/* 5) Global buttons */
 .action-buttons {
   text-align: center;
-  margin: 10px 0 16px;
+  margin-bottom: 16px;
 }
 
 .action-buttons button {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: #fff;
   border: none;
-  padding: 10px 16px;
-  margin: 6px;
+  padding: 10px 14px;
+  margin: 4px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s ease;
-}
-
-.action-buttons button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(46, 204, 113, 0.35);
 }
 
 .action-buttons button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
 }
 
-/* ======================
-   Canvas
-====================== */
+/* 6) Canvas */
 #canvas {
   display: block;
-  margin: 12px auto 22px;
+  margin: 12px auto 18px;
   background: #111;
   border-radius: 10px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
 }
 
-/* ======================
-   Building Cards Container
-====================== */
+/* 7) Tabs */
+.building-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 10px auto;
+  max-width: 520px;
+}
+
+.building-tabs .tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #ddd;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.building-tabs .tab.active {
+  background: #4caf50;
+  color: #fff;
+}
+
+/* 8) Panels */
 #building-cards {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 10px;
-  padding: 22px;
-  max-width: 1100px;
+  padding: 14px;
+  max-width: 520px;
   margin: 0 auto 30px;
 }
 
-#building-cards > h2 {
-  color: #111;
-  text-shadow: none;
-  margin-bottom: 16px;
+.tab-panel {
+  display: none;
 }
 
-/*  “Span-like” card layout */
-.cards-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
+.tab-panel.active {
+  display: block;
 }
 
-/* ======================
-   Building Card
-====================== */
+/* 9) Building card */
 .building-card {
-  width: 200px;
-  height: 320px;
-  background: #f9f9f9;
+  background: #f7f7f7;
   border: 2px solid #667eea;
-  border-radius: 10px;
-  padding: 16px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: center;
-
-  transition: all 0.25s ease;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
 }
 
-.building-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.35);
-  border-color: #764ba2;
-}
-
-/* ======================
-   Building Image
-====================== */
-.building-image {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 10px;
-  image-rendering: pixelated;
-}
-
-/* ======================
-   Card Text
-====================== */
-.building-card h3 {
-  color: #667eea;
-  margin-bottom: 6px;
-}
-
-.building-card p,
-.building-card .cost {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-/* ======================
-   Build Row
-====================== */
-.build-row {
+/* 10) Accordion header */
+.accordion-header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 8px 0;
-}
-
-/* ======================
-   Workers
-====================== */
-.workers-row {
-  font-size: 14px;
-  font-weight: bold;
-  margin: 8px 0;
-  color: #333;
-}
-
-.worker-controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.no-workers .workers-row,
-.no-workers .worker-controls {
-  visibility: hidden;
-}
-
-/* ======================
-   Buttons (Card)
-====================== */
-.building-card button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 10px;
+  background: #667eea;
   color: #fff;
   border: none;
-  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+/* 11) Summary */
+.accordion-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #eee;
+  align-items: center;
+}
+
+.accordion-summary span {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* 12) Accordion body */
+.accordion-body {
+  display: none;
+  padding: 10px;
+  background: #fafafa;
+  font-size: 13px;
+}
+
+.accordion.open .accordion-body {
+  display: block;
+}
+
+.accordion.open .chevron {
+  transform: rotate(90deg);
+}
+
+/* 13) Card buttons */
+.building-card button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s ease;
-}
-
-.building-card button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.35);
 }
 
 .building-card button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
-/* ======================
-   Responsive
-====================== */
-@media (max-width: 768px) {
-  body { padding: 10px; }
-  #resources { max-width: 100%; }
-  .building-card { width: 160px; height: 300px; }
-  #canvas { width: 100%; height: auto; }
-}
-#resources,
-.action-buttons,
-#canvas,
-#building-cards {
-  margin-left: auto;
-  margin-right: auto;
+/* 14) Workers */
+.workers-row {
+  margin-top: 6px;
+  font-weight: bold;
+  text-align: center;
 }
 
+.worker-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* 15) Mobile */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  #canvas {
+    width: 100%;
+    height: auto;
+  }
+
+  .building-tabs,
+  #building-cards {
+    max-width: 100%;
+  }
+}
