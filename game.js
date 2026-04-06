@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
 
   // 1) Resources
   const resLoose = { wood: 10, stone: 10, food: 10, coin: 0, metal: 0 };
@@ -83,9 +83,14 @@ const BUILDINGS = {
     return x-a.w/2<b.x+c.w/2 && x+a.w/2>b.x-c.w/2 && y-a.h/2<b.y+c.h/2 && y+a.h/2>b.y-c.h/2;
   });
 
-  // 10) Draw
+  // 10) Draw sprite loader
   const sprites = {};
-  Object.keys(BUILDINGS).forEach(t=>{ const i=new Image(); i.src=BUILDINGS[t].sprite; sprites[t]=i; });
+  Object.keys(BUILDINGS).forEach(t => {
+  const i = new Image();
+  i.onload = draw;      // 1) redraw when loaded
+  i.src = BUILDINGS[t].sprite;
+  sprites[t] = i;
+  });
   const draw = () => {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     placed.forEach(b=>{
@@ -137,8 +142,10 @@ canvas.addEventListener('click', () => {
   buildings[t]++;
 
   // update count UI
-  const el = document.getElementById(`${t}-count`);
-  if (el) el.textContent = `Built: ${buildings[t]}`;
+const countIdMap = { metalMine: 'metal-mine-count' };
+const id = countIdMap[t] || `${t}-count`;
+const el = document.getElementById(id);
+if (el) el.textContent = `Built: ${buildings[t]}`;
 
   // run build effect
   BUILDINGS[t].onBuild?.();
@@ -251,7 +258,19 @@ document.querySelectorAll('.tab').forEach(btn => {
     document.getElementById(target)?.classList.add('active');
   });
 });
+    // Accordion
+document.querySelectorAll('.accordion-header').forEach(h => {
+  h.addEventListener('click', (e) => {
+    e.stopPropagation(); // 1) don’t trigger “click outside canvas” logic
 
+    const card = h.closest('.accordion');
+    const wasOpen = card.classList.contains('open');
+
+    document.querySelectorAll('.accordion').forEach(c => c.classList.remove('open'));
+    if (!wasOpen) card.classList.add('open');
+  });
+});
+    
   // 19) Init
   updateUI(); draw();
 });
