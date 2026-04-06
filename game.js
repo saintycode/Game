@@ -47,19 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const snap = v => Math.round(v / GRID) * GRID;
 
   // 6) Buildings config
-  const BUILDINGS = {
-    townCentre: { w: 120, h: 80 },sprite: 'images/town-centre.png'},cost: {},
-    house: { cost:{wood:10,stone:5}, size:{w:70,h:70}, sprite:'images/house.png', onBuild:()=>villagers.idle+=2 },
-    farm: { cost:{wood:15,stone:7}, size:{w:90,h:70}, sprite:'images/farm.png', workers:2, prod:{food:1} },
-    logging:{ cost:{wood:20,stone:10}, size:{w:90,h:70}, sprite:'images/logging.png', workers:2, prod:{wood:1} },
-    market:{ cost:{wood:25,stone:15}, size:{w:90,h:70}, sprite:'images/market.png', workers:2, prod:{coin:1}, unique:true },
-    mine:{ cost:{wood:20,stone:12,coin:5}, size:{w:90,h:70}, sprite:'images/mine.png', workers:2, prod:{stone:1}, req:['market'] },
-    metalMine:{ cost:{wood:30,stone:20,coin:10}, size:{w:90,h:70}, sprite:'images/metal-mine.png', workers:2, prod:{metal:1}, req:['market'] },
-    warehouse:{ cost:{wood:40,stone:20}, size:{w:90,h:70}, sprite:'images/warehouse.png', cap:{wood:1000,stone:1000,food:1000,metal:1000,coin:100} },
-    tower:{ cost:{wood:30,stone:20,coin:10}, size:{w:70,h:90}, sprite:'images/guard-tower.png', train:2, guard:2, time:5000 },
-    archery:{ cost:{wood:100,stone:200,coin:50}, size:{w:90,h:70}, sprite:'images/archery.png', train:2, time:7000 },
-    barracks:{ cost:{wood:100,stone:300,metal:300,coin:150}, size:{w:90,h:70}, sprite:'images/barracks.png', train:2, time:9000, req:['metalMine','market'] }
-  };
+const BUILDINGS = {
+  townCentre: { cost:{}, size:{w:120,h:80}, sprite:'images/town-centre.png' },
+  house: { cost:{wood:10,stone:5}, size:{w:70,h:70}, sprite:'images/house.png', onBuild:()=>villagers.idle+=2 },
+  farm: { cost:{wood:15,stone:7}, size:{w:90,h:70}, sprite:'images/farm.png', workers:2, prod:{food:1} },
+  logging:{ cost:{wood:20,stone:10}, size:{w:90,h:70}, sprite:'images/logging.png', workers:2, prod:{wood:1} },
+  market:{ cost:{wood:25,stone:15}, size:{w:90,h:70}, sprite:'images/market.png', workers:2, prod:{coin:1}, unique:true },
+  mine:{ cost:{wood:20,stone:12,coin:5}, size:{w:90,h:70}, sprite:'images/mine.png', workers:2, prod:{stone:1}, req:['market'] },
+  metalMine:{ cost:{wood:30,stone:20,coin:10}, size:{w:90,h:70}, sprite:'images/metal-mine.png', workers:2, prod:{metal:1}, req:['market'] },
+  warehouse:{ cost:{wood:40,stone:20}, size:{w:90,h:70}, sprite:'images/warehouse.png', cap:{wood:1000,stone:1000,food:1000,metal:1000,coin:100} },
+  tower:{ cost:{wood:30,stone:20,coin:10}, size:{w:70,h:90}, sprite:'images/guard-tower.png', train:2, guard:2, time:5000 },
+  archery:{ cost:{wood:100,stone:200,coin:50}, size:{w:90,h:70}, sprite:'images/archery.png', train:2, time:7000 },
+  barracks:{ cost:{wood:100,stone:300,metal:300,coin:150}, size:{w:90,h:70}, sprite:'images/barracks.png', train:2, time:9000, req:['metalMine','market'] }
+};
+
 
   // 7) Placement state
   const placed = [{ type:'townCentre', x:400, y:400 }];
