@@ -233,16 +233,24 @@ canvas.addEventListener('click', () => {
   document.getElementById('train-archer')?.addEventListener('click',()=>train('archery','archers'));
   document.getElementById('train-soldier')?.addEventListener('click',()=>train('barracks','soldiers'));
   document.getElementById('send-villagers-training')?.addEventListener('click',()=>train('tower','guards'));
-// Tabs
-document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));document.querySelectorAll('.tab').forEach(tab => {
+// 19) Tabs
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
 
-    tab.classList.add('active');
-    const id = tab.dataset.tab;
-    document.getElementById(id)?.classList.add('active');
+    // clear active states
+    document.querySelectorAll('.tab').forEach(t =>
+      t.classList.remove('active')
+    );
+    document.querySelectorAll('.tab-panel').forEach(p =>
+      p.classList.remove('active')
+    );
+
+    // activate clicked tab
+    btn.classList.add('active');
+    const target = btn.dataset.tab;
+    document.getElementById(target)?.classList.add('active');
   });
 });
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 
   // 19) Init
   updateUI(); draw();
