@@ -2,25 +2,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1) GAME STATE (numbers that change during play)
   const resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
-  const buildings = {
-    townCentre: 1,
-    house: 0,
-    farm: 0,
-    logging: 0,
-    market: 0,
-    tower: 0
-  };
+const buildings = {const buildings 1,
+  house: 0,
+  farm: 0,
+  logging: 0,
+  market: 0,
+  mine: 0,
+  tower: 0
+};
+
 
   const villagers = {
   idle: 2,
   gathering: 0,
   working: 0,
   training: 0,
-  guards: 0   // ✅ new
+  guards: 0
 };
  
   // How many workers are assigned to each workplace type
-  const workersAssigned = { farm: 0, logging: 0, market: 0 };
+const workersAssigned = {
+: 0,  farm: 0,
+  market: 0,
+  mine: 0 
+};
+
   
   // How many training/guards are assigned
   const trainingQueue = [];
@@ -79,7 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
       productionPerWorker: { wood: 1 },
       onBuild: () => {}
     },
-
+   mine: {
+    label: 'Mine',
+    cost: { wood: 20, stone: 12, food: 0, coin: 5 },
+    size: { w: 90, h: 70 },
+    sprite: 'images/mine.png',
+    workerSlots: 2,
+    productionPerWorker: { stone: 1 },
+    onBuild: () => {}
+    },
     market: {
       label: 'Market',
       cost: { wood: 25, stone: 15, food: 0, coin: 0 },
@@ -104,20 +118,23 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Which DOM element holds "Built: X" for each building type
-  const COUNT_ID = {
-    house: 'house-count',
-    farm: 'farm-count',
-    logging: 'logging-count',
-    market: 'market-count',
-    tower: 'tower-count'
-  };
+  const COUNT_ID = {const COUNT: 'house-count',
+  farm: 'farm-count',
+  logging: 'logging-count',
+  market: 'market-count',
+  mine: 'mine-count',     
+  tower: 'tower-count'
+};
+
 
   // Worker UI elements in your cards
   const WORKER_UI = {
-    farm: 'farm-workers',
-    logging: 'logging-workers',
-    market: 'market-workers'
-  };
+  farm logging: 'logging-workers',  
+  farm: 'farm-workers',
+  market: 'market-workers',
+  mine: 'mine-workers'    
+};
+
 
   // 4) SPRITE LOADING (images)
   const sprites = {};
@@ -290,7 +307,10 @@ function updateDisplay() {
       alert('Only one market allowed');
       return;
     }
-
+    if (type === 'mine' && (buildings.market <= 0 || resources.coin < 5)) {
+    alert('You need a Market and 5 coin to build a Mine');
+    return;
+    }
     if (!hasResources(def.cost)) {
       alert('Not enough resources');
       return;
@@ -477,6 +497,7 @@ document.getElementById('tower-remove-worker')?.addEventListener('click', remove
   document.getElementById('build-logging')?.addEventListener('click', () => startPlacement('logging'));
   document.getElementById('build-market')?.addEventListener('click', () => startPlacement('market'));
   document.getElementById('build-tower')?.addEventListener('click', () => startPlacement('tower'));
+  document.getElementById('build-mine')?.addEventListener('click', () => startPlacement('mine'));
 
   // Worker + / -
   function assignWorkerTo(type) {
@@ -504,6 +525,9 @@ document.getElementById('tower-remove-worker')?.addEventListener('click', remove
   document.getElementById('logging-remove-worker')?.addEventListener('click', () => removeWorkerFrom('logging'));
   document.getElementById('market-add-worker')?.addEventListener('click', () => assignWorkerTo('market'));
   document.getElementById('market-remove-worker')?.addEventListener('click', () => removeWorkerFrom('market'));
+  document.getElementById('mine-add-worker')?.addEventListener('click', () => assignWorkerTo('mine'));
+  document.getElementById('mine-remove-worker')?.addEventListener('click', () => removeWorkerFrom('mine'));
+  
 function updateDisplay() {
   updateResourceUI();
   updateVillagerUI();
