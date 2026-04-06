@@ -86,8 +86,12 @@
         <div class="accordion-summary">
           <button id="build-farm">Build</button>
           <span id="farm-count">Built: 0</span>
-          <span id="farm-workers">0 / 0</span>
-        </div>
+        <div class="worker-controls">
+        <button id="farm-remove-worker">−</button>
+        <span id="farm-workers">0 / 0</span>
+        <button id="farm-add-worker">+</button>
+      </div>
+
         <div class="accordion-body" id="accordion-farm">
           <img src="images/farm.png">
           <p>Cost: 🪵15 ⛏️7</p>
@@ -102,7 +106,11 @@
         <div class="accordion-summary">
           <button id="build-logging">Build</button>
           <span id="logging-count">Built: 0</span>
-          <span id="logging-workers">0 / 0</span>
+           <div class="worker-controls">
+        <button id="logging-remove-worker">−</button>
+        <span id="logging-workers">0 / 0</span>
+        <button id="logging-add-worker">+</button>
+      </div>
         </div>
         <div class="accordion-body" id="accordion-logging">
           <img src="images/logging.png">
@@ -118,7 +126,11 @@
         <div class="accordion-summary">
           <button id="build-market">Build</button>
           <span id="market-count">Built: 0</span>
-          <span id="market-workers">0 / 0</span>
+           <div class="worker-controls">
+        <button id="market-remove-worker">−</button>
+        <span id="market-workers">0 / 0</span>
+        <button id="market-add-worker">+</button>
+      </div>
         </div>
         <div class="accordion-body" id="accordion-market">
           <img src="images/market.png">
@@ -134,6 +146,9 @@
         <div class="accordion-summary">
           <button id="build-mine">Build</button>
           <span id="mine-count">Built: 0</span>
+          <div class="worker-controls">
+        <button id="mine-remove-worker">−</button>
+        <button id="mine-add-worker">+</button>
           <span id="mine-workers">0 / 0</span>
         </div>
         <div class="accordion-body" id="accordion-mine">
@@ -151,6 +166,9 @@
         <div class="accordion-summary">
           <button id="build-metal-mine">Build</button>
           <span id="metal-mine-count">Built: 0</span>
+                 <div class="worker-controls">
+        <button id="metalMine-remove-worker">−</button>
+        <button id="metalMine-add-worker">+</button>
           <span id="metalMine-workers">0 / 0</span>
         </div>
         <div class="accordion-body" id="accordion-metalMine">
@@ -187,6 +205,9 @@
         <div class="accordion-summary">
           <button id="build-tower">Build</button>
           <span id="tower-count">Built: 0</span>
+                   <div class="worker-controls">
+        <button id="tower-remove-worker">−</button>
+        <button id="tower-add-worker">+</button>
           <span id="tower-workers">0 / 0</span>
         </div>
         <div class="accordion-body" id="accordion-tower">
@@ -203,10 +224,10 @@
         <div class="accordion-summary">
           <button id="build-archery">Build</button>
           <span id="archery-count">Built: 0</span>
+          <button id="train-archer">Train Archer</button>
         </div>
         <div class="accordion-body" id="accordion-archery">
           <p>Cost: 🪵100 ⛏️200 🪙50</p>
-          <button id="train-archer">Train Archer</button>
         </div>
       </div>
 
@@ -218,10 +239,11 @@
         <div class="accordion-summary">
           <button id="build-barracks">Build</button>
           <span id="barracks-count">Built: 0</span>
+        <button id="train-soldier">Train Soldier</button>
         </div>
         <div class="accordion-body" id="accordion-barracks">
           <p>Cost: 🪵100 ⛏️300 🔩300 🪙150</p>
-          <button id="train-soldier">Train Soldier</button>
+      
         </div>
       </div>
     </div>
