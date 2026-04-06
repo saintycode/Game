@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // =========================================================
   // 1) GAME STATE (numbers that change during play)
-  // =========================================================
   const resources = { wood: 10, stone: 10, food: 10, coin: 0 };
 
   const buildings = {
@@ -13,14 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
     tower: 0
   };
 
-  const villagers = { idle: 2, gathering: 0, working: 0, training: 0 };
-  const trainingQueue = [];
+  const villagers = {
+  idle: 2,
+  gathering: 0,
+  working: 0,
+  training: 0,
+  guards: 0   // ✅ new
+};
+ 
   // How many workers are assigned to each workplace type
   const workersAssigned = { farm: 0, logging: 0, market: 0 };
-
-  // =========================================================
+  
+  // How many training/guards are assigned
+  const trainingQueue = [];
+  const guardsAssigned = 0;
+  
   // 2) CANVAS + GRID
-  // =========================================================
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
 
@@ -28,15 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const snapToGrid = (v) => Math.round(v / GRID_SIZE) * GRID_SIZE;
 
-  // =========================================================
+
   // 3) BUILDING DEFINITIONS (edit here to add new buildings)
-  //    - cost: resources required to build
-  //    - size: used for collision + bounds + drawing size
-  //    - sprite: image path
-  //    - workerSlots: how many workers each building can hold (0 = none)
-  //    - productionPerWorker: resource output per worker per tick
-  //    - onBuild: special effect when built
-  // =========================================================
   const BUILDINGS = {
     townCentre: {
       label: 'Town Centre',
@@ -91,19 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
       onBuild: () => {}
     },
 
-  tower: {
-  label: 'Guard Tower',
-  cost: { wood: 30, stone: 20, food: 0, coin: 10 },
-  size: { w: 70, h: 90 },
-  sprite: 'images/guard-tower.png',
+    tower: { label: 'Guard Tower',
+    cost: { wood: 30, stone: 20, food: 0, coin: 10 },
+    size: { w: 70, h: 90 },
+    sprite: 'images/guard-tower.png',
 
-  // ✅ training instead of workers
-  trainingSlots: 2,        // per tower
-  trainingTimeMs: 5000,    // 5 seconds per villager
-  onBuild: () => {}
-}
+    trainingSlots: 2,     // training at a time
+    guardSlots: 2,        // ✅ NEW: guard duty slots per tower
+    trainingTimeMs: 5000,
 
-
+    onBuild: () => {}
+    }
   };
 
   // Which DOM element holds "Built: X" for each building type
@@ -122,9 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     market: 'market-workers'
   };
 
-  // =========================================================
   // 4) SPRITE LOADING (images)
-  // =========================================================
   const sprites = {};
 
   function loadSprites() {
@@ -136,16 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // =========================================================
   // 5) WORLD STATE (what is placed on the canvas)
-  // =========================================================
   const placedBuildings = [
     { type: 'townCentre', x: 400, y: 400 } // starting building
   ];
 
-  // =========================================================
   // 6) PLACEMENT MODE + GHOST
-  // =========================================================
   const placementMode = { active: false, type: null };
 
   const ghost = { x: 0, y: 0, visible: false, valid: false };
@@ -181,9 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return withinBounds(x, y, type) && !collides(x, y, type);
   }
 
-  // =========================================================
   // 7) UI UPDATE FUNCTIONS
-  // =========================================================
   function updateResourceUI() {
     const foodEl = document.getElementById('food');
     const woodEl = document.getElementById('wood');
@@ -231,17 +220,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (removeBtn) removeBtn.disabled = cur === 0;
     });
   }
+function updateGuardUI() {
+  const guardEl = document.getElementById('tower-workers');
+  if (!guardEl) return;
 
-  function updateDisplay() {
-    updateResourceUI();
-    updateVillagerUI();
-    updateWorkerUI();
-    updateWorkerButtons();
-  }
+  const maxGuards =
+    buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
 
-  // =========================================================
+  guardEl.textContent = `${villagers.guards} / ${maxGuards}`;
+}
+  
+function updateDisplay() {
+  updateResourceUI();
+  updateVillagerUI();
+  updateWorkerUI();
+  updateWorkerButtons();
+  updateGuardUI(); // ✅ new
+}
   // 8) DRAWING (sprites + ghost)
-  // =========================================================
   function drawBuildingSprite(type, x, y) {
     const img = sprites[type];
     const { w, h } = getFootprint(type);
@@ -275,9 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // =========================================================
   // 9) BUILD FLOW (enter placement mode from a card)
-  // =========================================================
   function hasResources(cost) {
     return Object.keys(cost).every((r) => (resources[r] ?? 0) >= cost[r]);
   }
@@ -313,9 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     drawAll();
   }
 
-  // =========================================================
   // 10) INPUT: mousemove / click / escape
-  // =========================================================
   canvas.addEventListener('mousemove', (e) => {
     if (!placementMode.active) return;
 
@@ -379,10 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
     drawAll();
   });
 
-  // =========================================================
-  // 11) BUTTONS (villagers + build cards + workers)
-  // =========================================================
 
+  // 11) BUTTONS (villagers + build cards + workers)
   // Villagers: gathering
   document.getElementById('send-villagers')?.addEventListener('click', () => {
     if (villagers.idle <= 0) return alert('No idle villagers available!');
@@ -398,15 +388,31 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDisplay();
   });
   // Villagers: traning for guard 
-  document.getElementById('send-villagers-training')?.addEventListener('click', () => {
+// Guards UI (villager row)
+function updateGuardsUI() {
+  const guardsEl = document.getElementById('villagers-guards');
+  if (guardsEl) guardsEl.textContent = `Guards: ${villagers.guards}`;
+}
+
+// Guard Tower UI (card row)
+function updateGuardUI() {
+  const guardEl = document.getElementById('tower-workers');
+  if (!guardEl) return;
+
+  const maxGuards = buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
+  guardEl.textContent = `${villagers.guards} / ${maxGuards}`;
+}
+
+// Training (time-based)
+document.getElementById('send-villagers-training')?.addEventListener('click', () => {
   const towerCount = buildings.tower;
+
   if (towerCount <= 0) {
     alert('You need a Guard Tower to train villagers');
     return;
   }
 
-  const maxTraining =
-    towerCount * (BUILDINGS.tower.trainingSlots ?? 0);
+  const maxTraining = towerCount * (BUILDINGS.tower.trainingSlots ?? 0);
 
   if (villagers.idle <= 0) {
     alert('No idle villagers available');
@@ -418,24 +424,52 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // ✅ Move villager into training
   villagers.idle--;
   villagers.training++;
-
   updateDisplay();
 
-  // ✅ Start training timer
   const trainingTime = BUILDINGS.tower.trainingTimeMs ?? 5000;
 
   const timeoutId = setTimeout(() => {
     villagers.training--;
-    villagers.idle++; // later: guards++
-
+    villagers.idle++; // v1: trained villagers return to idle
     updateDisplay();
   }, trainingTime);
 
   trainingQueue.push(timeoutId);
 });
+
+
+// Guard Duty Assignment (+ / -)
+function assignGuard() {
+  const maxGuards = buildings.tower * (BUILDINGS.tower.guardSlots ?? 0);
+
+  if (villagers.idle <= 0) {
+    alert('No available villagers to assign');
+    return;
+  }
+
+  if (villagers.guards >= maxGuards) {
+    alert('All guard slots are full');
+    return;
+  }
+
+  villagers.idle--;
+  villagers.guards++;
+  updateDisplay();
+}
+
+function removeGuard() {
+  if (villagers.guards <= 0) return;
+
+  villagers.guards--;
+  villagers.idle++;
+  updateDisplay();
+}
+
+//  Attach guard buttons 
+document.getElementById('tower-add-worker')?.addEventListener('click', assignGuard);
+document.getElementById('tower-remove-worker')?.addEventListener('click', removeGuard);
 
   // Build buttons (cards)
   document.getElementById('build-house')?.addEventListener('click', () => startPlacement('house'));
@@ -470,14 +504,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logging-remove-worker')?.addEventListener('click', () => removeWorkerFrom('logging'));
   document.getElementById('market-add-worker')?.addEventListener('click', () => assignWorkerTo('market'));
   document.getElementById('market-remove-worker')?.addEventListener('click', () => removeWorkerFrom('market'));
+function updateDisplay() {
+  updateResourceUI();
+  updateVillagerUI();
+  updateWorkerUI();
+  updateWorkerButtons();
+  updateGuardsUI(); 
+  updateGuardUI();   
+}
 
-  // =========================================================
   // 12) RESOURCE TICK (simple + predictable)
-  // =========================================================
-  // Every tick:
-  // - gathering villagers generate basic resources
-  // - working villagers generate building-specific resources
-  // - you can tweak numbers here later
+
   setInterval(() => {
     // Gathering
     resources.wood += villagers.gathering * 1;
@@ -498,9 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDisplay();
   }, 3000);
 
-  // =========================================================
   // 13) INIT
-  // =========================================================
   loadSprites();
   updateDisplay();
   drawAll();
