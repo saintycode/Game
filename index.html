@@ -45,212 +45,238 @@
   <!-- 4) Game canvas -->
   <canvas id="canvas" width="800" height="800"></canvas>
 
-  <!-- 5) Tabs -->
-  <div class="building-tabs">
-    <button class="tab active" data-tab="civil">🏠 Civil</button>
-    <button class="tab" data-tab="economy">🌾 Economy</button>
-    <button class="tab" data-tab="military">🛡️ Military</button>
-  </div>
+<!-- 5) Tabs -->
+<div <button class="tab active" data-tab="civil">🏠 Civil</button><div class="building-tabs">
+  <button class="tab" data-tab="economy">🌾 Economy</button>
+  <button class="tab" data-tab="military">🛡️ Military</button>
+</div>
 
-  <!-- 6) Building panels -->
-  <div id="building-cards">
+<!-- 6) Building panels -->
+<div id="building-cards">
 
-    <!-- CIVIL -->
-    <div class="tab-panel active" id="civil">
+  <!-- ================= CIVIL ================= -->
+  <div class="tab-panel active" id="civil">
 
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="house">
-          <span>🏠 House</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-house">Build</button>
-          <span id="house-count">Built: 0</span>
-        </div>
-        <div class="accordion-body" id="accordion-house">
-          <img src="images/house.png" alt="House">
-          <p>Cost: 🪵10 ⛏️5</p>
-          <p>+2 villagers</p>
-        </div>
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🏠 House</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-house">Build</button>
+        <span id="house-count">Built: 0</span>
       </div>
 
+      <div class="accordion-body">
+        <img src="images/house.png" alt="House">
+        <p>Cost: 🪵10 ⛏️5</p>
+        <p>+2 villagers</p>
+      </div>
     </div>
 
-    <!-- ECONOMY -->
-    <div class="tab-panel" id="economy">
+  </div>
 
-      <!-- Farm -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="farm">
-          <span>🌾 Farm</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-farm">Build</button>
-          <span id="farm-count">Built: 0</span>
+  <!-- ================= ECONOMY ================= -->
+  <div class="tab-panel" id="economy">
+
+    <!-- Farm -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🌾 Farm</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-farm">Build</button>
+        <span id="farm-count">Built: 0</span>
+
         <div class="worker-controls">
-        <button id="farm-remove-worker">−</button>
-        <span id="farm-workers">0 / 0</span>
-        <button id="farm-add-worker">+</button>
-      </div>
-
-        <div class="accordion-body" id="accordion-farm">
-          <img src="images/farm.png">
-          <p>Cost: 🪵15 ⛏️7</p>
+          <button id="farm-remove-worker">−</button>
+          <span id="farm-workers">0 / 0</span>
+          <button id="farm-add-worker">+</button>
         </div>
       </div>
 
-      <!-- Logging -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="logging">
-          <span>🪓 Logging</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-logging">Build</button>
-          <span id="logging-count">Built: 0</span>
-           <div class="worker-controls">
-        <button id="logging-remove-worker">−</button>
-        <span id="logging-workers">0 / 0</span>
-        <button id="logging-add-worker">+</button>
-      </div>
-        </div>
-        <div class="accordion-body" id="accordion-logging">
-          <img src="images/logging.png">
-          <p>Cost: 🪵20 ⛏️10</p>
-        </div>
-      </div>
-
-      <!-- Market -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="market">
-          <span>🏪 Market</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-market">Build</button>
-          <span id="market-count">Built: 0</span>
-           <div class="worker-controls">
-        <button id="market-remove-worker">−</button>
-        <span id="market-workers">0 / 0</span>
-        <button id="market-add-worker">+</button>
-      </div>
-        </div>
-        <div class="accordion-body" id="accordion-market">
-          <img src="images/market.png">
-          <p>Cost: 🪵25 ⛏️15</p>
-        </div>
-      </div>
-
-      <!-- Mine -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="mine">
-          <span>⛏️ Mine</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-mine">Build</button>
-          <span id="mine-count">Built: 0</span>
-          <div class="worker-controls">
-        <button id="mine-remove-worker">−</button>
-        <span id="mine-workers">0 / 0</span>
-        <button id="mine-add-worker">+</button>
-        
-        </div>
-        <div class="accordion-body" id="accordion-mine">
-          <img src="images/mine.png">
-          <p>Cost: 🪵20 ⛏️12 🪙5</p>
-          <p>Requires Market</p>
-        </div>
-      </div>
-
-      <!-- Metal Mine -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="metalMine">
-          <span>🔩 Metal Mine</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-metal-mine">Build</button>
-          <span id="metal-mine-count">Built: 0</span>
-                 <div class="worker-controls">
-        <button id="metalMine-remove-worker">−</button>
-        <span id="metalMine-workers">0 / 0</span>
-        <button id="metalMine-add-worker">+</button>
-
-        </div>
-        <div class="accordion-body" id="accordion-metalMine">
-          <p>Cost: 🪵30 ⛏️20 🪙10</p>
-          <p>Produces metal</p>
-        </div>
-      </div>
-
-      <!-- Warehouse -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="warehouse">
-          <span>🏬 Warehouse</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-warehouse">Build</button>
-          <span id="warehouse-count">Built: 0</span>
-        </div>
-        <div class="accordion-body" id="accordion-warehouse">
-          <p>Cost: 🪵40 ⛏️20</p>
-          <p>Stores worker resources</p>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- MILITARY -->
-    <div class="tab-panel" id="military">
-
-      <!-- Guard Tower -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="tower">
-          <span>🛡️ Guard Tower</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-tower">Build</button>
-          <span id="tower-count">Built: 0</span>
-                   <div class="worker-controls">
-        <button id="tower-remove-worker">−</button>
-                       <span id="tower-workers">0 / 0</span>
-        <button id="tower-add-worker">+</button>
-        
-        </div>
-        <div class="accordion-body" id="accordion-tower">
-          <p>Cost: 🪵30 ⛏️20 🪙10</p>
-          <button id="send-villagers-training">Train Guard</button>
-        </div>
-      </div>
-
-      <!-- Archery -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="archery">
-          <span>🏹 Archery</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-archery">Build</button>
-          <span id="archery-count">Built: 0</span>
-          <button id="train-archer">Train Archer</button>
-        </div>
-        <div class="accordion-body" id="accordion-archery">
-          <p>Cost: 🪵100 ⛏️200 🪙50</p>
-        </div>
-      </div>
-
-      <!-- Barracks -->
-      <div class="building-card accordion">
-        <button class="accordion-header" data-accordion="barracks">
-          <span>🪖 Barracks</span><span class="chevron">▶</span>
-        </button>
-        <div class="accordion-summary">
-          <button id="build-barracks">Build</button>
-          <span id="barracks-count">Built: 0</span>
-        <button id="train-soldier">Train Soldier</button>
-        </div>
-        <div class="accordion-body" id="accordion-barracks">
-          <p>Cost: 🪵100 ⛏️300 🔩300 🪙150</p>
-      
-        </div>
+      <div class="accordion-body">
+        <img src="images/farm.png">
+        <p>Cost: 🪵15 ⛏️7</p>
       </div>
     </div>
+
+    <!-- Logging -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🪓 Logging</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-logging">Build</button>
+        <span id="logging-count">Built: 0</span>
+
+        <div class="worker-controls">
+          <button id="logging-remove-worker">−</button>
+          <span id="logging-workers">0 / 0</span>
+          <button id="logging-add-worker">+</button>
+        </div>
+      </div>
+
+      <div class="accordion-body">
+        <img src="images/logging.png">
+        <p>Cost: 🪵20 ⛏️10</p>
+      </div>
+    </div>
+
+    <!-- Market -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🏪 Market</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-market">Build</button>
+        <span id="market-count">Built: 0</span>
+
+        <div class="worker-controls">
+          <button id="market-remove-worker">−</button>
+          <span id="market-workers">0 / 0</span>
+          <button id="market-add-worker">+</button>
+        </div>
+      </div>
+
+      <div class="accordion-body">
+        <img src="images/market.png">
+        <p>Cost: 🪵25 ⛏️15</p>
+      </div>
+    </div>
+
+    <!-- Mine -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>⛏️ Mine</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-mine">Build</button>
+        <span id="mine-count">Built: 0</span>
+
+        <div class="worker-controls">
+          <button id="mine-remove-worker">−</button>
+          <span id="mine-workers">0 / 0</span>
+          <button id="mine-add-worker">+</button>
+        </div>
+      </div>
+
+      <div class="accordion-body">
+        <img src="images/mine.png">
+        <p>Cost: 🪵20 ⛏️12 🪙5</p>
+        <p>Requires Market</p>
+      </div>
+    </div>
+
+    <!-- Metal Mine -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🔩 Metal Mine</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-metal-mine">Build</button>
+        <span id="metal-mine-count">Built: 0</span>
+
+        <div class="worker-controls">
+          <button id="metalMine-remove-worker">−</button>
+          <span id="metalMine-workers">0 / 0</span>
+          <button id="metalMine-add-worker">+</button>
+        </div>
+      </div>
+
+      <div class="accordion-body">
+        <p>Cost: 🪵30 ⛏️20 🪙10</p>
+        <p>Produces metal</p>
+      </div>
+    </div>
+
+    <!-- Warehouse -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🏬 Warehouse</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-warehouse">Build</button>
+        <span id="warehouse-count">Built: 0</span>
+      </div>
+
+      <div class="accordion-body">
+        <p>Cost: 🪵40 ⛏️20</p>
+        <p>Stores worker resources</p>
+      </div>
+    </div>
+
   </div>
+
+  <!-- ================= MILITARY ================= -->
+  <div class="tab-panel" id="military">
+
+    <!-- Guard Tower -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🛡️ Guard Tower</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-tower">Build</button>
+        <span id="tower-count">Built: 0</span>
+
+        <div class="worker-controls">
+          <button id="tower-remove-worker">−</button>
+          <span id="tower-workers">0 / 0</span>
+          <button id="tower-add-worker">+</button>
+        </div>
+      </div>
+
+      <div class="accordion-body">
+        <p>Cost: 🪵30 ⛏️20 🪙10</p>
+        <button id="send-villagers-training">Train Guard</button>
+      </div>
+    </div>
+
+    <!-- Archery -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🏹 Archery</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-archery">Build</button>
+        <span id="archery-count">Built: 0</span>
+        <button id="train-archer">Train Archer</button>
+      </div>
+
+      <div class="accordion-body">
+        <p>Cost: 🪵100 ⛏️200 🪙50</p>
+      </div>
+    </div>
+
+    <!-- Barracks -->
+    <div class="building-card accordion">
+      <button class="accordion-header">
+        <span>🪖 Barracks</span><span class="chevron">▶</span>
+      </button>
+
+      <div class="accordion-summary">
+        <button id="build-barracks">Build</button>
+        <span id="barracks-count">Built: 0</span>
+        <button id="train-soldier">Train Soldier</button>
+      </div>
+
+      <div class="accordion-body">
+        <p>Cost: 🪵100 ⛏️300 🔩300 🪙150</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 </div>
 <script src="game.js"></script>
 </body>
